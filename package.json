@@ -1,0 +1,34 @@
+{
+  "name": "fhir-studio",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "25.2.0",
+    "vitest": "4.0.18",
+    "vite": "7.3.1",
+    "jsdom": "28.0.0",
+    "@vitest/coverage-v8": "4.0.18",
+    "@vitest/ui": "4.0.18",
+    "rimraf": "6.1.2",
+    "esbuild": "0.27.2",
+    "@microsoft/api-extractor": "^7.57.7",
+    "tsx": "4.21.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

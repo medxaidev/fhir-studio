@@ -1,0 +1,31 @@
+{
+  "port": 8080,
+  "baseUrl": "http://localhost:8080/",
+  "consoleUrl": "http://localhost:3001/",
+  "allowedOrigins": "*",
+  "maxJsonSize": "1mb",
+  "maxBatchSize": "50mb",
+  "bodyLimit": 16777216,
+  "logger": false,
+  "enableAuth": true,
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "dbname": "medxai_dev",
+    "username": "postgres",
+    "password": "YOUR_DB_PASSWORD"
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "password": "",
+    "db": 0,
+    "enabled": false
+  },
+  "seed": {
+    "adminEmail": "admin@medxai.test",
+    "adminPassword": "YOUR_ADMIN_PASSWORD",
+    "skipConformance": false
+  },
+  "shutdownTimeoutMilliseconds": 30000
+}

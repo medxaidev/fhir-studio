@@ -1,0 +1,46 @@
+{
+  "name": "@medxai/fhir-client",
+  "version": "0.0.1",
+  "description": "MedXAI FHIR client",
+  "homepage": "https://medxai.com.cn",
+  "license": "Apache-2.0",
+  "author": "Fangjun <fangjun20208@gmail.com>",
+  "keywords": [
+    "typescript",
+    "FHIR",
+    "client"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/medxaidev/medxai.git",
+    "directory": "packages/fhir-client"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc && node ./scripts/esbuild.mjs",
+    "test": "vitest"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "peerDependencies": {}
+}
