@@ -1,7 +1,7 @@
 /**
  * OAuth2 UserInfo Endpoint
  *
- * Implements `GET/POST /oauth2/userinfo` â€” OpenID Connect UserInfo.
+ * Implements `GET/POST /oauth2/userinfo` â€?OpenID Connect UserInfo.
  *
  * Returns claims about the authenticated user based on the access token.
  *
@@ -9,7 +9,7 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
 import { requireAuth } from "./middleware.js";
 
 /**

@@ -1,7 +1,7 @@
 /**
  * Auth Register (New User) Endpoint
  *
- * Implements `POST /auth/newuser` â€” self-service user registration.
+ * Implements `POST /auth/newuser` â€?self-service user registration.
  *
  * Flow:
  * 1. Validate required fields (email, password, projectId)
@@ -14,7 +14,7 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
 import { hash } from "bcryptjs";
 
 // =============================================================================

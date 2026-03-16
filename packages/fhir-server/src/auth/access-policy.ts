@@ -3,21 +3,21 @@
  *
  * Implements the first three layers of Medplum's four-layer AccessPolicy model:
  *
- * - **Layer 1: supportsInteraction()** â€” Type-level pre-check (fast reject)
- * - **Layer 2: canPerformInteraction()** â€” Instance-level check (projectId + readonly)
- * - **Layer 3: getSearchCriteria()** â€” Search SQL criteria injection
+ * - **Layer 1: supportsInteraction()** â€?Type-level pre-check (fast reject)
+ * - **Layer 2: canPerformInteraction()** â€?Instance-level check (projectId + readonly)
+ * - **Layer 3: getSearchCriteria()** â€?Search SQL criteria injection
  *
  * Layer 4 (field-level control) is deferred.
  *
  * @module fhir-server/auth
  */
 
-import type { PersistedResource } from "@medxai/fhir-persistence";
+import type { PersistedResource } from "fhir-persistence";
 import {
   PROTECTED_RESOURCE_TYPES,
   PROJECT_ADMIN_RESOURCE_TYPES,
-} from "@medxai/fhir-persistence";
-import type { ParsedSearchParam } from "@medxai/fhir-persistence";
+} from "fhir-persistence";
+import type { ParsedSearchParam } from "fhir-persistence";
 import type { OperationContext } from "./middleware.js";
 
 // =============================================================================
@@ -59,7 +59,7 @@ export interface ParsedAccessPolicy {
 }
 
 // =============================================================================
-// Section 2: Layer 1 â€” Type-Level Pre-Check
+// Section 2: Layer 1 â€?Type-Level Pre-Check
 // =============================================================================
 
 /**
@@ -78,12 +78,12 @@ export function supportsInteraction(
   context: OperationContext,
   accessPolicy?: ParsedAccessPolicy,
 ): boolean {
-  // Rule 1: Protected types â€” only superAdmin
+  // Rule 1: Protected types â€?only superAdmin
   if (PROTECTED_RESOURCE_TYPES.has(resourceType) && !context.superAdmin) {
     return false;
   }
 
-  // Rule 2: No AccessPolicy â†’ allow all (superAdmin or system operations)
+  // Rule 2: No AccessPolicy â†?allow all (superAdmin or system operations)
   if (!accessPolicy) {
     return true;
   }
@@ -95,7 +95,7 @@ export function supportsInteraction(
 }
 
 // =============================================================================
-// Section 3: Layer 2 â€” Instance-Level Check
+// Section 3: Layer 2 â€?Instance-Level Check
 // =============================================================================
 
 /**
@@ -115,12 +115,12 @@ export function canPerformInteraction(
 ): AccessPolicyResourceEntry | undefined {
   const resourceType = resource.resourceType;
 
-  // Rule 1: Protected types â€” only superAdmin
+  // Rule 1: Protected types â€?only superAdmin
   if (PROTECTED_RESOURCE_TYPES.has(resourceType) && !context.superAdmin) {
     return undefined;
   }
 
-  // Rule 2: No AccessPolicy â†’ allow all
+  // Rule 2: No AccessPolicy â†?allow all
   if (!accessPolicy) {
     return { resourceType: "*" }; // Synthetic "allow all" entry
   }
@@ -175,7 +175,7 @@ export function buildDefaultAccessPolicy(): ParsedAccessPolicy {
 }
 
 // =============================================================================
-// Section 4b: Layer 3 â€” Search Criteria Injection
+// Section 4b: Layer 3 â€?Search Criteria Injection
 // =============================================================================
 
 /**
@@ -241,7 +241,7 @@ export function parseCriteriaString(criteria: string): ParsedSearchParam[] {
 
     if (!rawKey || !rawValue) continue;
 
-    // Parse modifier from key (e.g., "name:exact" â†’ code="name", modifier="exact")
+    // Parse modifier from key (e.g., "name:exact" â†?code="name", modifier="exact")
     const colonIndex = rawKey.indexOf(":");
     const code = colonIndex >= 0 ? rawKey.slice(0, colonIndex) : rawKey;
     const modifier = colonIndex >= 0 ? rawKey.slice(colonIndex + 1) : undefined;
@@ -297,6 +297,6 @@ function shallowMatchesPolicy(
     return READ_INTERACTIONS.has(interaction);
   }
 
-  // No restrictions â€” allow
+  // No restrictions â€?allow
   return true;
 }

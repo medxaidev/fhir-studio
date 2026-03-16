@@ -8,7 +8,7 @@
  * @module fhir-server/subscriptions
  */
 
-import type { ResourceRepository } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
 import { EventEmitter } from "node:events";
 
 // =============================================================================
@@ -57,7 +57,7 @@ export interface SubscriptionNotification {
  *
  * Format: "ResourceType?param1=value1&param2=value2"
  *
- * @example parseCriteria("Patient?name=Smith") â†’ { resourceType: "Patient", params: Map { "name" â†’ "Smith" } }
+ * @example parseCriteria("Patient?name=Smith") â†?{ resourceType: "Patient", params: Map { "name" â†?"Smith" } }
  */
 export function parseCriteria(criteria: string): SubscriptionCriteria {
   const qIdx = criteria.indexOf("?");

@@ -4,4 +4,12 @@ node_modules/
 # build
 dist/
 
+# database files
+**/data/*.db
+**/data/*.db-journal
+**/data/*.db-wal
+
+# fhir packages (downloaded from registry)
+**/fhir-packages/
+
 devdocs/

@@ -114,7 +114,7 @@ export async function handleUpdate(
     }
 
     const resource = { ...body, resourceType, id };
-    const updated = await engine.persistence.updateResource(resourceType, id, resource);
+    const updated = await engine.persistence.updateResource(resourceType, resource);
 
     const h = buildResourceHeaders(updated);
     const location = buildLocationHeader(baseUrl, updated.resourceType, updated.id, updated.meta.versionId);

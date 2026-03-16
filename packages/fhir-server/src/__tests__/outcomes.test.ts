@@ -1,5 +1,5 @@
 /**
- * OperationOutcome Builders â€” Unit Tests
+ * OperationOutcome Builders â€?Unit Tests
  */
 
 import { describe, it, expect } from "vitest";
@@ -8,7 +8,7 @@ import {
   ResourceGoneError,
   ResourceVersionConflictError,
   RepositoryError,
-} from "@medxai/fhir-persistence";
+} from "fhir-persistence";
 import {
   operationOutcome,
   allOk,

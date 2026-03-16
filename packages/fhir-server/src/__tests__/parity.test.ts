@@ -26,7 +26,7 @@ import { fileURLToPath } from "node:url";
 import type { FastifyInstance } from "fastify";
 import pg from "pg";
 
-import { DatabaseClient, FhirRepository } from "@medxai/fhir-persistence";
+import { DatabaseClient, FhirRepository } from "fhir-persistence";
 import { createApp } from "../app.js";
 
 // =============================================================================
@@ -205,7 +205,7 @@ afterAll(async () => {
 // =============================================================================
 
 describe("1. CREATE Parity", () => {
-  it("CR-P-01: minimal Patient â†’ both 201, id+meta present", async () => {
+  it("CR-P-01: minimal Patient â†?both 201, id+meta present", async () => {
     const body = { resourceType: "Patient" };
     const mx = await medxaiRequest("POST", "/Patient", body);
     const mp = await medplumRequest("POST", "/Patient", body);
@@ -267,7 +267,7 @@ describe("1. CREATE Parity", () => {
     trackBoth("Patient", mx.body.id, mp.body.id);
   });
 
-  it("CR-P-04: create â†’ read returns same data", async () => {
+  it("CR-P-04: create â†?read returns same data", async () => {
     const body = { resourceType: "Patient", name: [{ family: "ReadBack" }] };
     const mxC = await medxaiRequest("POST", "/Patient", body);
     const mpC = await medplumRequest("POST", "/Patient", body);
@@ -283,7 +283,7 @@ describe("1. CREATE Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("CR-P-05: create â†’ history has exactly 1 entry", async () => {
+  it("CR-P-05: create â†?history has exactly 1 entry", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     const mxH = await medxaiRequest("GET", `/Patient/${mxC.body.id}/_history`);
@@ -311,14 +311,14 @@ describe("1. CREATE Parity", () => {
     trackBoth("Observation", mx.body.id, mp.body.id);
   });
 
-  it("CR-P-07: resourceType mismatch (URL vs body) â†’ both 400", async () => {
+  it("CR-P-07: resourceType mismatch (URL vs body) â†?both 400", async () => {
     const mx = await medxaiRequest("POST", "/Patient", { resourceType: "Observation" });
     const mp = await medplumRequest("POST", "/Patient", { resourceType: "Observation" });
     expect(mx.status).toBe(400);
     expect(mp.status).toBe(400);
   });
 
-  it("CR-P-08: 10 rapid creates â†’ all succeed, unique ids", async () => {
+  it("CR-P-08: 10 rapid creates â†?all succeed, unique ids", async () => {
     const mxIds: string[] = [];
     const mpIds: string[] = [];
     for (let i = 0; i < 10; i++) {
@@ -366,7 +366,7 @@ describe("1. CREATE Parity", () => {
 // =============================================================================
 
 describe("2. READ Parity", () => {
-  it("RD-P-01: read existing â†’ 200, same structure", async () => {
+  it("RD-P-01: read existing â†?200, same structure", async () => {
     const body = { resourceType: "Patient", name: [{ family: "ReadTest" }] };
     const mxC = await medxaiRequest("POST", "/Patient", body);
     const mpC = await medplumRequest("POST", "/Patient", body);
@@ -379,7 +379,7 @@ describe("2. READ Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("RD-P-02: read non-existent â†’ both 404", async () => {
+  it("RD-P-02: read non-existent â†?both 404", async () => {
     const fakeId = randomUUID();
     const mx = await medxaiRequest("GET", `/Patient/${fakeId}`);
     const mp = await medplumRequest("GET", `/Patient/${fakeId}`);
@@ -389,7 +389,7 @@ describe("2. READ Parity", () => {
     expect(mp.body.resourceType).toBe("OperationOutcome");
   });
 
-  it("RD-P-03: read deleted resource â†’ both 410", async () => {
+  it("RD-P-03: read deleted resource â†?both 410", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     await medxaiRequest("DELETE", `/Patient/${mxC.body.id}`);
@@ -403,7 +403,7 @@ describe("2. READ Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("RD-P-04: vread specific version â†’ both 200", async () => {
+  it("RD-P-04: vread specific version â†?both 200", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "VRead" }] });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "VRead" }] });
     const mxV = await medxaiRequest("GET", `/Patient/${mxC.body.id}/_history/${mxC.body.meta.versionId}`);
@@ -415,7 +415,7 @@ describe("2. READ Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("RD-P-05: vread non-existent version â†’ both 404", async () => {
+  it("RD-P-05: vread non-existent version â†?both 404", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     const fakeVid = randomUUID();
@@ -442,7 +442,7 @@ describe("2. READ Parity", () => {
 // =============================================================================
 
 describe("3. UPDATE Parity", () => {
-  it("UP-P-01: update â†’ version changes, history grows", async () => {
+  it("UP-P-01: update â†?version changes, history grows", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "Before" }] });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "Before" }] });
 
@@ -481,7 +481,7 @@ describe("3. UPDATE Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("UP-P-03: sequential If-Match â†’ stale version rejected on both", async () => {
+  it("UP-P-03: sequential If-Match â†?stale version rejected on both", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "IfM" }] });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "IfM" }] });
     const mxVid = mxC.body.meta.versionId;
@@ -505,7 +505,7 @@ describe("3. UPDATE Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("UP-P-04: update non-existent â†’ compare behavior", async () => {
+  it("UP-P-04: update non-existent â†?compare behavior", async () => {
     const fakeId = randomUUID();
     const mx = await medxaiRequest("PUT", `/Patient/${fakeId}`, { resourceType: "Patient", id: fakeId, name: [{ family: "Ghost" }] });
     const mp = await medplumRequest("PUT", `/Patient/${fakeId}`, { resourceType: "Patient", id: fakeId, name: [{ family: "Ghost" }] });
@@ -515,7 +515,7 @@ describe("3. UPDATE Parity", () => {
     if (mp.status === 201) track("medplum", "Patient", mp.body.id);
   });
 
-  it("UP-P-05: update with mismatched resourceType â†’ both 400", async () => {
+  it("UP-P-05: update with mismatched resourceType â†?both 400", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     const mxU = await medxaiRequest("PUT", `/Patient/${mxC.body.id}`, { resourceType: "Observation", id: mxC.body.id });
@@ -525,7 +525,7 @@ describe("3. UPDATE Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("UP-P-06: three sequential updates â†’ history has 4 entries", async () => {
+  it("UP-P-06: three sequential updates â†?history has 4 entries", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "Seq-0" }] });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "Seq-0" }] });
     for (let i = 1; i <= 3; i++) {
@@ -555,7 +555,7 @@ describe("3. UPDATE Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("UP-P-08: update with mismatched id â†’ both 400", async () => {
+  it("UP-P-08: update with mismatched id â†?both 400", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     const mxU = await medxaiRequest("PUT", `/Patient/${mxC.body.id}`, { resourceType: "Patient", id: randomUUID() });
@@ -563,7 +563,7 @@ describe("3. UPDATE Parity", () => {
     // KNOWN GAP: MedXAI does not validate body.id vs URL id (overwrites URL id in route handler)
     // Medplum returns 400 for mismatched id
     expect(mpU.status).toBe(400);
-    // MedXAI accepts it (200) â€” documented as parity gap
+    // MedXAI accepts it (200) â€?documented as parity gap
     expect([200, 400]).toContain(mxU.status);
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
@@ -574,7 +574,7 @@ describe("3. UPDATE Parity", () => {
 // =============================================================================
 
 describe("4. DELETE Parity", () => {
-  it("DE-P-01: delete â†’ read returns 410", async () => {
+  it("DE-P-01: delete â†?read returns 410", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     const mxD = await medxaiRequest("DELETE", `/Patient/${mxC.body.id}`);
@@ -588,7 +588,7 @@ describe("4. DELETE Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("DE-P-02: delete â†’ history still accessible with 2 entries", async () => {
+  it("DE-P-02: delete â†?history still accessible with 2 entries", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     await medxaiRequest("DELETE", `/Patient/${mxC.body.id}`);
@@ -602,7 +602,7 @@ describe("4. DELETE Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("DE-P-03: history after delete â†’ delete entry present, method consistent", async () => {
+  it("DE-P-03: history after delete â†?delete entry present, method consistent", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     await medxaiRequest("DELETE", `/Patient/${mxC.body.id}`);
@@ -619,7 +619,7 @@ describe("4. DELETE Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("DE-P-04: double delete â†’ compare behavior", async () => {
+  it("DE-P-04: double delete â†?compare behavior", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     await medxaiRequest("DELETE", `/Patient/${mxC.body.id}`);
@@ -632,7 +632,7 @@ describe("4. DELETE Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("DE-P-05: delete non-existent â†’ same error code", async () => {
+  it("DE-P-05: delete non-existent â†?same error code", async () => {
     const fakeId = randomUUID();
     const mx = await medxaiRequest("DELETE", `/Patient/${fakeId}`);
     const mp = await medplumRequest("DELETE", `/Patient/${fakeId}`);
@@ -645,7 +645,7 @@ describe("4. DELETE Parity", () => {
 // =============================================================================
 
 describe("5. HISTORY Parity", () => {
-  it("HI-P-01: createâ†’updateâ†’updateâ†’delete â†’ 4 history entries", async () => {
+  it("HI-P-01: createâ†’updateâ†’updateâ†’delete â†?4 history entries", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "H0" }] });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "H0" }] });
     await medxaiRequest("PUT", `/Patient/${mxC.body.id}`, { resourceType: "Patient", id: mxC.body.id, name: [{ family: "H1" }] });
@@ -661,7 +661,7 @@ describe("5. HISTORY Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("HI-P-02: history ordering â€” newest first", async () => {
+  it("HI-P-02: history ordering â€?newest first", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "Old" }] });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "Old" }] });
     await medxaiRequest("PUT", `/Patient/${mxC.body.id}`, { resourceType: "Patient", id: mxC.body.id, name: [{ family: "New" }] });
@@ -723,7 +723,7 @@ describe("5. HISTORY Parity", () => {
 // =============================================================================
 
 describe("6. Error Handling Parity", () => {
-  it("ER-P-01: read non-existent â†’ both 404 + OperationOutcome", async () => {
+  it("ER-P-01: read non-existent â†?both 404 + OperationOutcome", async () => {
     const fakeId = randomUUID();
     const mx = await medxaiRequest("GET", `/Patient/${fakeId}`);
     const mp = await medplumRequest("GET", `/Patient/${fakeId}`);
@@ -733,7 +733,7 @@ describe("6. Error Handling Parity", () => {
     expect(mp.body.resourceType).toBe("OperationOutcome");
   });
 
-  it("ER-P-02: vread non-existent version â†’ both 404", async () => {
+  it("ER-P-02: vread non-existent version â†?both 404", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     const fakeVid = randomUUID();
@@ -744,7 +744,7 @@ describe("6. Error Handling Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("ER-P-03: stale If-Match â†’ both conflict", async () => {
+  it("ER-P-03: stale If-Match â†?both conflict", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     await medxaiRequest("PUT", `/Patient/${mxC.body.id}`, { resourceType: "Patient", id: mxC.body.id, name: [{ family: "Fresh" }] });
@@ -760,14 +760,14 @@ describe("6. Error Handling Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("ER-P-04: POST with resourceType mismatch â†’ both 400", async () => {
+  it("ER-P-04: POST with resourceType mismatch â†?both 400", async () => {
     const mx = await medxaiRequest("POST", "/Patient", { resourceType: "Observation" });
     const mp = await medplumRequest("POST", "/Patient", { resourceType: "Observation" });
     expect(mx.status).toBe(400);
     expect(mp.status).toBe(400);
   });
 
-  it("ER-P-05: PUT with mismatched id â†’ Medplum 400, MedXAI accepts (known gap)", async () => {
+  it("ER-P-05: PUT with mismatched id â†?Medplum 400, MedXAI accepts (known gap)", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     const mx = await medxaiRequest("PUT", `/Patient/${mxC.body.id}`, { resourceType: "Patient", id: randomUUID() });
@@ -785,7 +785,7 @@ describe("6. Error Handling Parity", () => {
 // =============================================================================
 
 describe("7. Concurrency Stress Parity", () => {
-  it("CC-P-01: 20 concurrent creates â†’ all succeed, unique ids", async () => {
+  it("CC-P-01: 20 concurrent creates â†?all succeed, unique ids", async () => {
     const mxResults = await Promise.all(
       Array.from({ length: 20 }, (_, i) =>
         medxaiRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: `CC-${i}` }] }),
@@ -806,7 +806,7 @@ describe("7. Concurrency Stress Parity", () => {
     for (const r of mpOk) track("medplum", "Patient", r.body.id);
   }, 30_000);
 
-  it("CC-P-02: 10 sequential updates (no If-Match) â†’ all succeed, history=11", async () => {
+  it("CC-P-02: 10 sequential updates (no If-Match) â†?all succeed, history=11", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "CC-Base" }] });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "CC-Base" }] });
     for (let i = 0; i < 10; i++) {
@@ -826,7 +826,7 @@ describe("7. Concurrency Stress Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   }, 30_000);
 
-  it("CC-P-03: 10 sequential If-Match updates â†’ stale ones rejected", async () => {
+  it("CC-P-03: 10 sequential If-Match updates â†?stale ones rejected", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     let mxVid = mxC.body.meta.versionId;
@@ -855,7 +855,7 @@ describe("7. Concurrency Stress Parity", () => {
 // =============================================================================
 
 describe("8. Database Layer Parity", () => {
-  it("DB-P-01: main table after create â†’ deleted=false, content JSON present", async () => {
+  it("DB-P-01: main table after create â†?deleted=false, content JSON present", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "DBCheck" }] });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient", name: [{ family: "DBCheck" }] });
 
@@ -877,7 +877,7 @@ describe("8. Database Layer Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("DB-P-02: history table after create+update â†’ 2 rows", async () => {
+  it("DB-P-02: history table after create+update â†?2 rows", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     await medxaiRequest("PUT", `/Patient/${mxC.body.id}`, { resourceType: "Patient", id: mxC.body.id, name: [{ family: "Up" }] });
@@ -890,7 +890,7 @@ describe("8. Database Layer Parity", () => {
     trackBoth("Patient", mxC.body.id, mpC.body.id);
   });
 
-  it("DB-P-03: soft delete â†’ deleted=true in main table", async () => {
+  it("DB-P-03: soft delete â†?deleted=true in main table", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     await medxaiRequest("DELETE", `/Patient/${mxC.body.id}`);
@@ -947,7 +947,7 @@ describe("9. Extreme/Edge Parity", () => {
     trackBoth("Patient", mx.body.id, mp.body.id);
   }, 30_000);
 
-  it("EX-P-02: deep nesting (5 levels) â€” MedXAI preserves, Medplum may reject", async () => {
+  it("EX-P-02: deep nesting (5 levels) â€?MedXAI preserves, Medplum may reject", async () => {
     let nested: any = { valueString: "deep" };
     for (let i = 0; i < 5; i++) {
       nested = { url: `http://level-${i}`, extension: [nested] };
@@ -968,7 +968,7 @@ describe("9. Extreme/Edge Parity", () => {
     }
   });
 
-  it("EX-P-03: 20 consecutive updates â†’ history count matches", async () => {
+  it("EX-P-03: 20 consecutive updates â†?history count matches", async () => {
     const mxC = await medxaiRequest("POST", "/Patient", { resourceType: "Patient" });
     const mpC = await medplumRequest("POST", "/Patient", { resourceType: "Patient" });
     for (let i = 0; i < 20; i++) {
@@ -1024,7 +1024,7 @@ describe("9. Extreme/Edge Parity", () => {
     trackBoth("Patient", mx.body.id, mp.body.id);
   });
 
-  it("EX-P-06: empty arrays handling â€” both consistent", async () => {
+  it("EX-P-06: empty arrays handling â€?both consistent", async () => {
     const body = { resourceType: "Patient", name: [], identifier: [] };
     const mx = await medxaiRequest("POST", "/Patient", body);
     const mp = await medplumRequest("POST", "/Patient", body);

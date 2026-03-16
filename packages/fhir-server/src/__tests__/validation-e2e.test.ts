@@ -20,8 +20,8 @@ import {
   DatabaseClient,
   FhirRepository,
   SearchParameterRegistry,
-} from "@medxai/fhir-persistence";
-import type { SearchParameterBundle } from "@medxai/fhir-persistence";
+} from "fhir-persistence";
+import type { SearchParameterBundle } from "fhir-persistence";
 import { readFileSync, existsSync } from "fs";
 
 // =============================================================================
@@ -91,7 +91,7 @@ afterAll(async () => {
 // Section 2: Initialization Tests
 // =============================================================================
 
-describe("Validation Gate — Init", () => {
+describe("Validation Gate �?Init", () => {
   it("loaded profiles for common resource types", () => {
     expect(validationCtx.profileCount).toBeGreaterThan(100);
     expect(validationCtx.profiles.has("Patient")).toBe(true);
@@ -105,8 +105,8 @@ describe("Validation Gate — Init", () => {
 // Section 3: Valid Resource Tests
 // =============================================================================
 
-describe("Validation Gate — Valid Resources", () => {
-  it("POST valid Patient → 201", async () => {
+describe("Validation Gate �?Valid Resources", () => {
+  it("POST valid Patient �?201", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/Patient",
@@ -124,7 +124,7 @@ describe("Validation Gate — Valid Resources", () => {
     expect(body.id).toBeDefined();
   });
 
-  it("POST valid Observation → 201", async () => {
+  it("POST valid Observation �?201", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/Observation",
@@ -141,7 +141,7 @@ describe("Validation Gate — Valid Resources", () => {
     expect(res.statusCode).toBe(201);
   });
 
-  it("POST minimal valid Condition → 201", async () => {
+  it("POST minimal valid Condition �?201", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/Condition",
@@ -154,7 +154,7 @@ describe("Validation Gate — Valid Resources", () => {
     expect(res.statusCode).toBe(201);
   });
 
-  it("PUT valid Patient update → 200", async () => {
+  it("PUT valid Patient update �?200", async () => {
     // Create first
     const createRes = await app.inject({
       method: "POST",
@@ -191,8 +191,8 @@ describe("Validation Gate — Valid Resources", () => {
 // Section 4: Invalid Resource Tests (422)
 // =============================================================================
 
-describe("Validation Gate — Invalid Resources (422)", () => {
-  it("POST Patient with wrong resourceType in body → 422", async () => {
+describe("Validation Gate �?Invalid Resources (422)", () => {
+  it("POST Patient with wrong resourceType in body �?422", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/Patient",
@@ -208,7 +208,7 @@ describe("Validation Gate — Invalid Resources (422)", () => {
     expect([201, 400, 422]).toContain(res.statusCode);
   });
 
-  it("POST resource missing resourceType → 400 (caught by route)", async () => {
+  it("POST resource missing resourceType �?400 (caught by route)", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/Patient",
@@ -227,8 +227,8 @@ describe("Validation Gate — Invalid Resources (422)", () => {
 // Section 5: Platform Resource Tests (no crash)
 // =============================================================================
 
-describe("Validation Gate — Platform Resources (graceful)", () => {
-  it("POST platform resource type not in R4 profiles → passes through", async () => {
+describe("Validation Gate �?Platform Resources (graceful)", () => {
+  it("POST platform resource type not in R4 profiles �?passes through", async () => {
     // Login, User, Project etc. are platform resources with no R4 StructureDefinition
     // The validator should skip them (return valid: true)
     const res = await app.inject({
@@ -248,8 +248,8 @@ describe("Validation Gate — Platform Resources (graceful)", () => {
 // Section 6: Validator does not block valid complex resources
 // =============================================================================
 
-describe("Validation Gate — Complex Resources", () => {
-  it("POST Patient with extensions and identifiers → 201", async () => {
+describe("Validation Gate �?Complex Resources", () => {
+  it("POST Patient with extensions and identifiers �?201", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/Patient",
@@ -263,7 +263,7 @@ describe("Validation Gate — Complex Resources", () => {
           },
         ],
         name: [
-          { use: "official", family: "王", given: ["明"] },
+          { use: "official", family: "�?, given: ["�?] },
           { use: "nickname", text: "小明" },
         ],
         telecom: [
@@ -274,7 +274,7 @@ describe("Validation Gate — Complex Resources", () => {
         address: [
           {
             use: "home",
-            line: ["朝阳区建国路88号"],
+            line: ["朝阳区建国路88�?],
             city: "北京",
             country: "CN",
           },
@@ -288,7 +288,7 @@ describe("Validation Gate — Complex Resources", () => {
     expect(body.identifier).toHaveLength(1);
   });
 
-  it("POST Bundle → 201 (Bundle has its own profile)", async () => {
+  it("POST Bundle �?201 (Bundle has its own profile)", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/Bundle",

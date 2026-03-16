@@ -51,6 +51,7 @@ function createMockEngine(overrides?: Partial<FhirEngine>): FhirEngine {
       getValueSet: vi.fn(),
       getResourceTypes: vi.fn().mockReturnValue(["Patient", "Observation", "Encounter"]),
     },
+    resourceTypes: ["Patient", "Observation", "Encounter"],
     stop: vi.fn(),
     ...overrides,
   } as unknown as FhirEngine;

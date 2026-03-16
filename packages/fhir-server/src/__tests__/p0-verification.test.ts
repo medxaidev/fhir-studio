@@ -1,10 +1,10 @@
 /**
- * Phase P0 â€” Verification Audit Tests (V1-V5)
+ * Phase P0 â€?Verification Audit Tests (V1-V5)
  *
  * V1: Persistence stress (concurrent writes)
  * V2: Search completeness (all param types generate correct WHERE)
  * V3: Multi-tenant penetration (project isolation)
- * V4: History version integrity (create â†’ update â†’ delete chain)
+ * V4: History version integrity (create â†?update â†?delete chain)
  * V5: Transaction rollback (partial failure)
  *
  * These tests use mock repositories to verify contract correctness
@@ -17,10 +17,10 @@ import { createMockRepo, createTestApp, mockPersistedResource, mockHistoryEntry 
 import type { MockRepo } from "./helpers.js";
 
 // =============================================================================
-// V1: Persistence Stress â€” Concurrent Writes
+// V1: Persistence Stress â€?Concurrent Writes
 // =============================================================================
 
-describe("V1 â€” Persistence Stress (concurrent writes)", () => {
+describe("V1 â€?Persistence Stress (concurrent writes)", () => {
   let app: FastifyInstance;
   let repo: MockRepo;
 
@@ -92,7 +92,7 @@ describe("V1 â€” Persistence Stress (concurrent writes)", () => {
   });
 
   it("V1.4: version conflict returns 409", async () => {
-    const { ResourceVersionConflictError } = await import("@medxai/fhir-persistence");
+    const { ResourceVersionConflictError } = await import("fhir-persistence");
     (repo.updateResource as any).mockRejectedValueOnce(
       new ResourceVersionConflictError("Patient", "conflict-pat", "stale-version", "current-version"),
     );
@@ -117,7 +117,7 @@ describe("V1 â€” Persistence Stress (concurrent writes)", () => {
 // V2: Search Completeness
 // =============================================================================
 
-describe("V2 â€” Search Completeness", () => {
+describe("V2 â€?Search Completeness", () => {
   let app: FastifyInstance;
   let repo: MockRepo;
 
@@ -202,7 +202,7 @@ describe("V2 â€” Search Completeness", () => {
 // V3: Multi-tenant Penetration (project isolation)
 // =============================================================================
 
-describe("V3 â€” Multi-tenant Penetration", () => {
+describe("V3 â€?Multi-tenant Penetration", () => {
   let app: FastifyInstance;
   let repo: MockRepo;
 
@@ -216,7 +216,7 @@ describe("V3 â€” Multi-tenant Penetration", () => {
   });
 
   it("V3.1: read passes OperationContext to repo when authenticated", async () => {
-    // Without auth, context is undefined â€” should still work
+    // Without auth, context is undefined â€?should still work
     const resource = mockPersistedResource("Patient", { id: "v3-read" });
     (repo.readResource as any).mockResolvedValueOnce(resource);
 
@@ -296,7 +296,7 @@ describe("V3 â€” Multi-tenant Penetration", () => {
 // V4: History Version Integrity
 // =============================================================================
 
-describe("V4 â€” History Version Integrity", () => {
+describe("V4 â€?History Version Integrity", () => {
   let app: FastifyInstance;
   let repo: MockRepo;
 
@@ -369,7 +369,7 @@ describe("V4 â€” History Version Integrity", () => {
   });
 
   it("V4.5: vread of non-existent version returns error", async () => {
-    const { ResourceNotFoundError } = await import("@medxai/fhir-persistence");
+    const { ResourceNotFoundError } = await import("fhir-persistence");
     (repo.readVersion as any).mockRejectedValueOnce(
       new ResourceNotFoundError("Patient", "vread-pat2"),
     );
@@ -398,7 +398,7 @@ describe("V4 â€” History Version Integrity", () => {
 // V5: Transaction Rollback
 // =============================================================================
 
-describe("V5 â€” Transaction & Batch Rollback", () => {
+describe("V5 â€?Transaction & Batch Rollback", () => {
   let app: FastifyInstance;
   let repo: MockRepo;
 
@@ -450,7 +450,7 @@ describe("V5 â€” Transaction & Batch Rollback", () => {
   });
 
   it("V5.4: DELETE on non-existent resource returns 404/410", async () => {
-    const { ResourceNotFoundError } = await import("@medxai/fhir-persistence");
+    const { ResourceNotFoundError } = await import("fhir-persistence");
     (repo.deleteResource as any).mockRejectedValueOnce(
       new ResourceNotFoundError("Patient", "not-here"),
     );
@@ -464,7 +464,7 @@ describe("V5 â€” Transaction & Batch Rollback", () => {
   });
 
   it("V5.5: DELETE on already-deleted resource returns 410", async () => {
-    const { ResourceGoneError } = await import("@medxai/fhir-persistence");
+    const { ResourceGoneError } = await import("fhir-persistence");
     (repo.deleteResource as any).mockRejectedValueOnce(
       new ResourceGoneError("Patient", "already-gone"),
     );

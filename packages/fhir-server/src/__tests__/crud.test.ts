@@ -2,7 +2,7 @@
  * FHIR CRUD Route Tests
  *
  * Tests all 6 FHIR REST interactions + /metadata using Fastify inject().
- * Uses a mock ResourceRepository â€” no database dependency.
+ * Uses a mock ResourceRepository â€?no database dependency.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
@@ -11,7 +11,7 @@ import {
   ResourceNotFoundError,
   ResourceGoneError,
   ResourceVersionConflictError,
-} from "@medxai/fhir-persistence";
+} from "fhir-persistence";
 import { createMockRepo, createTestApp, mockPersistedResource, mockHistoryEntry } from "./helpers.js";
 import type { MockRepo } from "./helpers.js";
 import { FHIR_JSON } from "../fhir/response.js";

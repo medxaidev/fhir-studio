@@ -47,12 +47,16 @@ export function generateCapabilityStatement(
 ): CapabilityStatement {
   const { engine, baseUrl, auth, softwareName, softwareVersion } = options;
 
-  // Get base CS from engine runtime
+  // Get base CS from engine runtime (if available) or build a minimal one
   let cs: CapabilityStatement;
-  try {
-    cs = engine.runtime.generateCapabilityStatement(baseUrl);
-  } catch {
-    // If engine doesn't have a CS generator, build a minimal one
+  const rt = engine.runtime as unknown as Record<string, unknown>;
+  if (typeof rt.generateCapabilityStatement === "function") {
+    try {
+      cs = (rt.generateCapabilityStatement as (url: string) => CapabilityStatement)(baseUrl);
+    } catch {
+      cs = buildMinimalCapabilityStatement(baseUrl, engine);
+    }
+  } else {
     cs = buildMinimalCapabilityStatement(baseUrl, engine);
   }
 
@@ -78,7 +82,7 @@ function buildMinimalCapabilityStatement(
   baseUrl: string,
   engine: FhirEngine,
 ): CapabilityStatement {
-  const resourceTypes = engine.definitions.getResourceTypes();
+  const resourceTypes = engine.resourceTypes;
 
   const resources = resourceTypes.map((type) => ({
     type,

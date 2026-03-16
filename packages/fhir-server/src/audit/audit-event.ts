@@ -17,7 +17,7 @@
  * @module fhir-server/audit
  */
 
-import type { ResourceRepository, FhirResource } from "@medxai/fhir-persistence";
+import type { ResourceRepository, FhirResource } from "fhir-persistence";
 import type { OperationContext } from "../auth/middleware.js";
 
 // =============================================================================
@@ -161,8 +161,8 @@ export function logAuditEvent(
 ): void {
   const auditEvent = buildAuditEvent(input);
 
-  // Fire-and-forget â€” don't await, don't block the response
+  // Fire-and-forget â€?don't await, don't block the response
   repo.createResource(auditEvent, undefined, context).catch(() => {
-    // Silently swallow errors â€” audit failures must not break operations
+    // Silently swallow errors â€?audit failures must not break operations
   });
 }

@@ -128,8 +128,18 @@ export function errorToOutcome(err: unknown): OutcomeWithStatus {
     };
   }
 
-  // Generic Error
+  // fhir-persistence RepositoryError subclasses (detected by error.name)
   if (err instanceof Error) {
+    switch (err.name) {
+      case "ResourceNotFoundError":
+        return { status: 404, outcome: operationOutcome("error", "not-found", err.message) };
+      case "ResourceGoneError":
+        return { status: 410, outcome: operationOutcome("error", "deleted", err.message) };
+      case "ResourceVersionConflictError":
+        return { status: 409, outcome: operationOutcome("error", "conflict", err.message) };
+    }
+
+    // Generic Error
     return {
       status: 500,
       outcome: serverError(err.message),

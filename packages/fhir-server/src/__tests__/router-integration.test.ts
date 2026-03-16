@@ -25,8 +25,8 @@ function createMockEngine(): FhirEngine {
         Promise.resolve(mockResource(r.resourceType, "new-id", "1"))),
       readResource: vi.fn().mockImplementation((t: string, id: string) =>
         Promise.resolve(mockResource(t, id))),
-      updateResource: vi.fn().mockImplementation((t: string, id: string) =>
-        Promise.resolve(mockResource(t, id, "2"))),
+      updateResource: vi.fn().mockImplementation((_t: string, r: any) =>
+        Promise.resolve(mockResource(r.resourceType, r.id, "2"))),
       deleteResource: vi.fn().mockResolvedValue(undefined),
       readHistory: vi.fn().mockResolvedValue([
         { resource: mockResource("Patient", "p-1", "2"), resourceType: "Patient", id: "p-1", versionId: "2", lastUpdated: "2026-01-15T10:00:00Z", deleted: false },
@@ -34,16 +34,15 @@ function createMockEngine(): FhirEngine {
       ]),
       readVersion: vi.fn().mockImplementation((t: string, id: string, vid: string) =>
         Promise.resolve(mockResource(t, id, vid))),
-      searchResources: vi.fn().mockResolvedValue({
-        resources: [mockResource("Patient", "p-1"), mockResource("Patient", "p-2")],
-        total: 2,
-      }),
-      processBundle: vi.fn().mockResolvedValue({
-        resourceType: "Bundle", type: "transaction-response", entry: [],
-      }),
     },
+    search: vi.fn().mockResolvedValue({
+      resources: [mockResource("Patient", "p-1"), mockResource("Patient", "p-2")],
+      total: 2,
+    }),
     runtime: { validate: vi.fn(), evalFhirPath: vi.fn(), generateCapabilityStatement: vi.fn() },
     definitions: { getStructureDefinition: vi.fn(), getValueSet: vi.fn(), getResourceTypes: vi.fn().mockReturnValue(["Patient"]) },
+    resourceTypes: ["Patient"],
+    status: vi.fn().mockReturnValue({ databaseType: "sqlite", fhirVersions: ["4.0"], resourceTypes: ["Patient"], loadedPackages: [], igAction: "consistent", startedAt: new Date().toISOString(), plugins: [] }),
     stop: vi.fn(),
   } as unknown as FhirEngine;
 }
@@ -166,7 +165,7 @@ describe("PUT /:resourceType/:id (Update)", () => {
   });
   it("calls updateResource with id from URL", async () => {
     await app.inject({ method: "PUT", url: "/Patient/p-1", headers: { "content-type": "application/fhir+json" }, payload: JSON.stringify({ resourceType: "Patient" }) });
-    expect(engine.persistence.updateResource).toHaveBeenCalledWith("Patient", "p-1", expect.objectContaining({ id: "p-1" }));
+    expect(engine.persistence.updateResource).toHaveBeenCalledWith("Patient", expect.objectContaining({ id: "p-1" }));
   });
   it("ETag reflects new version", async () => {
     const res = await app.inject({ method: "PUT", url: "/Patient/p-1", headers: { "content-type": "application/fhir+json" }, payload: JSON.stringify({ resourceType: "Patient" }) });
@@ -283,9 +282,9 @@ describe("GET /:resourceType (Search)", () => {
     const body = JSON.parse(res.body);
     expect(body.link[0].relation).toBe("self");
   });
-  it("calls searchResources", async () => {
+  it("calls engine.search", async () => {
     await app.inject({ method: "GET", url: "/Patient?name=John" });
-    expect(engine.persistence.searchResources).toHaveBeenCalled();
+    expect(engine.search).toHaveBeenCalled();
   });
 });
 
@@ -304,11 +303,11 @@ describe("POST /:resourceType/_search", () => {
 
 // Bundle
 describe("POST / (Bundle)", () => {
-  it("processes transaction bundle", async () => {
+  it("returns 501 for transaction bundle (deferred to v0.2.0)", async () => {
     const bundle = { resourceType: "Bundle", type: "transaction", entry: [] };
     const res = await app.inject({ method: "POST", url: "/", headers: { "content-type": "application/fhir+json" }, payload: JSON.stringify(bundle) });
-    expect(res.statusCode).toBe(200);
-    expect(JSON.parse(res.body).resourceType).toBe("Bundle");
+    expect(res.statusCode).toBe(501);
+    expect(JSON.parse(res.body).issue[0].code).toBe("not-supported");
   });
   it("400 for non-Bundle body", async () => {
     const res = await app.inject({ method: "POST", url: "/", headers: { "content-type": "application/fhir+json" }, payload: JSON.stringify({ resourceType: "Patient" }) });
@@ -318,10 +317,10 @@ describe("POST / (Bundle)", () => {
     const res = await app.inject({ method: "POST", url: "/", headers: { "content-type": "application/fhir+json" }, payload: JSON.stringify({ resourceType: "Bundle", type: "searchset" }) });
     expect(res.statusCode).toBe(400);
   });
-  it("calls processBundle", async () => {
+  it("returns 501 for bundle processing (deferred to v0.2.0)", async () => {
     const bundle = { resourceType: "Bundle", type: "batch", entry: [] };
-    await app.inject({ method: "POST", url: "/", headers: { "content-type": "application/fhir+json" }, payload: JSON.stringify(bundle) });
-    expect(engine.persistence.processBundle).toHaveBeenCalled();
+    const res = await app.inject({ method: "POST", url: "/", headers: { "content-type": "application/fhir+json" }, payload: JSON.stringify(bundle) });
+    expect(res.statusCode).toBe(501);
   });
   it("400 for missing body", async () => {
     const res = await app.inject({ method: "POST", url: "/" });

@@ -1,12 +1,12 @@
 /**
- * Test Helpers â€” Mock Repository & App Factory
+ * Test Helpers â€?Mock Repository & App Factory
  *
  * Provides a mock FhirRepository and a pre-configured Fastify app
  * for HTTP-level testing via inject().
  */
 
 import { vi } from "vitest";
-import type { ResourceRepository, PersistedResource, HistoryEntry, SearchParameterRegistry } from "@medxai/fhir-persistence";
+import type { ResourceRepository, PersistedResource, HistoryEntry, SearchParameterRegistry } from "fhir-persistence";
 import { createApp } from "../app.js";
 import type { FastifyInstance } from "fastify";
 import { randomUUID } from "node:crypto";

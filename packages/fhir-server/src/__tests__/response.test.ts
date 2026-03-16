@@ -1,5 +1,5 @@
 /**
- * FHIR Response Helpers â€” Unit Tests
+ * FHIR Response Helpers â€?Unit Tests
  */
 
 import { describe, it, expect } from "vitest";
@@ -11,7 +11,7 @@ import {
   buildResourceHeaders,
   FHIR_JSON,
 } from "../fhir/response.js";
-import type { PersistedResource } from "@medxai/fhir-persistence";
+import type { PersistedResource } from "fhir-persistence";
 
 describe("buildETag", () => {
   it("wraps versionId in weak validator format", () => {

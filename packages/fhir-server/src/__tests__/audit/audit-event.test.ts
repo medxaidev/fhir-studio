@@ -7,7 +7,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { buildAuditEvent, logAuditEvent } from "../../audit/audit-event.js";
 import type { AuditEventInput } from "../../audit/audit-event.js";
-import type { ResourceRepository } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
 
 // =============================================================================
 // buildAuditEvent

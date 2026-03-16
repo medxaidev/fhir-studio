@@ -13,7 +13,7 @@ import type {
   ResourceRepository,
   SearchParameterRegistry,
   SearchRequest,
-} from "@medxai/fhir-persistence";
+} from "fhir-persistence";
 import {
   parseSearchRequest,
   buildSearchBundle,
@@ -21,7 +21,7 @@ import {
   buildNextLink,
   buildPaginationContext,
   DEFAULT_SEARCH_COUNT,
-} from "@medxai/fhir-persistence";
+} from "fhir-persistence";
 import { FHIR_JSON } from "../fhir/response.js";
 import { errorToOutcome } from "../fhir/outcomes.js";
 import { getOperationContext } from "../auth/middleware.js";
@@ -49,9 +49,9 @@ interface CompartmentSearchParams {
  * Register FHIR search routes on a Fastify instance.
  *
  * Expects:
- * - `fastify.repo` â€” ResourceRepository
- * - `fastify.searchRegistry` â€” SearchParameterRegistry
- * - `fastify.baseUrl` â€” Base URL string
+ * - `fastify.repo` â€?ResourceRepository
+ * - `fastify.searchRegistry` â€?SearchParameterRegistry
+ * - `fastify.baseUrl` â€?Base URL string
  */
 export async function searchRoutes(fastify: FastifyInstance): Promise<void> {
   const repo = (fastify as any).repo as ResourceRepository;
@@ -172,7 +172,7 @@ async function handleSearch(
         searchRequest.params.push(...criteriaParams);
       }
     } catch {
-      // AccessPolicy not found or unreadable â€” proceed without criteria
+      // AccessPolicy not found or unreadable â€?proceed without criteria
     }
   }
 
@@ -216,7 +216,7 @@ async function handleSearch(
  * Handle compartment search: GET /:compartmentType/:compartmentId/:resourceType
  *
  * Example: GET /Patient/123/Observation
- * â†’ Search Observations where compartments array contains Patient 123's UUID.
+ * â†?Search Observations where compartments array contains Patient 123's UUID.
  *
  * Adds a synthetic `_compartment` search parameter that filters on
  * the `compartments` UUID[] column.

@@ -14,7 +14,7 @@
 
 import { exportJWK, generateKeyPair, importJWK, jwtVerify, SignJWT } from "jose";
 import type { JWK, JWTPayload, JWTVerifyResult } from "jose";
-import type { ResourceRepository, PersistedResource } from "@medxai/fhir-persistence";
+import type { ResourceRepository, PersistedResource } from "fhir-persistence";
 import { randomBytes } from "node:crypto";
 
 // jose v5 uses CryptoKey | Uint8Array as key types; we alias for clarity.
@@ -65,7 +65,7 @@ let signingKey: SigningKey | undefined;
 /** The kid (key ID) of the active signing key. */
 let signingKeyId: string | undefined;
 
-/** Map of kid â†’ public key (for verification). */
+/** Map of kid â†?public key (for verification). */
 const publicKeys = new Map<string, SigningKey>();
 
 /** The JWKS for the public endpoint. */
@@ -94,7 +94,7 @@ const PREFERRED_ALG = "ES256" as const;
  * 2. If none found, generates a new ES256 key pair and persists it.
  * 3. Builds the public JWKS and in-memory verification key map.
  *
- * @param repo - A repository instance (typically SystemRepo â€” no project filter).
+ * @param repo - A repository instance (typically SystemRepo â€?no project filter).
  * @param baseUrl - The server base URL (used as JWT issuer).
  */
 export async function initKeys(repo: ResourceRepository, baseUrl: string): Promise<void> {
@@ -258,7 +258,7 @@ export async function generateRefreshToken(
  */
 export async function verifyJwt(token: string): Promise<JWTVerifyResult> {
   if (publicKeys.size === 0) {
-    throw new Error("JWT keys not initialized â€” call initKeys() first");
+    throw new Error("JWT keys not initialized â€?call initKeys() first");
   }
 
   return jwtVerify(token, getKeyForHeader, {
@@ -268,7 +268,7 @@ export async function verifyJwt(token: string): Promise<JWTVerifyResult> {
 }
 
 /**
- * Key resolver for jose jwtVerify â€” looks up the public key by kid.
+ * Key resolver for jose jwtVerify â€?looks up the public key by kid.
  */
 function getKeyForHeader(protectedHeader: { kid?: string }): SigningKey {
   const kid = protectedHeader.kid;
@@ -318,7 +318,7 @@ export function generateSecret(bytes: number = 32): string {
  */
 function assertInitialized(): void {
   if (!signingKey || !signingKeyId) {
-    throw new Error("JWT signing key not initialized â€” call initKeys() first");
+    throw new Error("JWT signing key not initialized â€?call initKeys() first");
   }
 }
 

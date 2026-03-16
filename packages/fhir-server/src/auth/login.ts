@@ -1,7 +1,7 @@
 /**
  * Auth Login Handler
  *
- * Implements `POST /auth/login` â€” password-based authentication.
+ * Implements `POST /auth/login` â€?password-based authentication.
  *
  * Flow:
  * 1. Validate email + password
@@ -15,7 +15,7 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository, PersistedResource } from "@medxai/fhir-persistence";
+import type { ResourceRepository, PersistedResource } from "fhir-persistence";
 import { compare } from "bcryptjs";
 import { generateSecret } from "./keys.js";
 

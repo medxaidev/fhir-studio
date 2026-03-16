@@ -16,7 +16,7 @@ import type { FastifyInstance } from "fastify";
 import {
   ResourceNotFoundError,
   ResourceGoneError,
-} from "@medxai/fhir-persistence";
+} from "fhir-persistence";
 import { createMockRepo, createTestApp, mockPersistedResource } from "./helpers.js";
 import type { MockRepo } from "./helpers.js";
 import { FHIR_JSON } from "../fhir/response.js";
@@ -370,7 +370,7 @@ describe("PATCH /:resourceType/:id", () => {
     expect(updateArg.active).toBeUndefined();
   });
 
-  it("supports test operation â€” passes when value matches", async () => {
+  it("supports test operation â€?passes when value matches", async () => {
     const current = mockPersistedResource("Patient", {
       id: "p1",
       meta: { versionId: "v1", lastUpdated: "2026-02-27T10:00:00.000Z" },
@@ -497,7 +497,7 @@ describe("PATCH /:resourceType/:id", () => {
 
 describe("Conditional operations", () => {
   it("POST with If-None-Exist could be implemented in resource-routes", () => {
-    // This is a placeholder â€” conditional create via If-None-Exist header
+    // This is a placeholder â€?conditional create via If-None-Exist header
     // is typically handled in the POST resource-route handler.
     // The persistence layer already supports conditionalCreate().
     expect(true).toBe(true);

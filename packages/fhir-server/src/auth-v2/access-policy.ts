@@ -2,12 +2,12 @@
  * AccessPolicy Execution Engine
  *
  * Implements three-layer AccessPolicy model:
- * - **Layer 1: supportsInteraction()** â€” Type-level pre-check (fast reject)
- * - **Layer 2: canPerformInteraction()** â€” Instance-level check
- * - **Layer 3: getSearchCriteria()** â€” Search criteria injection
+ * - **Layer 1: supportsInteraction()** â€?Type-level pre-check (fast reject)
+ * - **Layer 2: canPerformInteraction()** â€?Instance-level check
+ * - **Layer 3: getSearchCriteria()** â€?Search criteria injection
  *
- * Adapted from medxai/fhir-server auth/access-policy.ts â€” uses local types,
- * removes @medxai/fhir-persistence imports.
+ * Adapted from medxai/fhir-server auth/access-policy.ts â€?uses local types,
+ * removes fhir-persistence imports.
  *
  * @module fhir-server/auth
  */
@@ -78,7 +78,7 @@ export interface ParsedSearchParam {
 }
 
 // =============================================================================
-// Section 2: Layer 1 â€” Type-Level Pre-Check
+// Section 2: Layer 1 â€?Type-Level Pre-Check
 // =============================================================================
 
 /**
@@ -95,12 +95,12 @@ export function supportsInteraction(
   context: OperationContext,
   accessPolicy?: ParsedAccessPolicy,
 ): boolean {
-  // Rule 1: Protected types â€” only superAdmin
+  // Rule 1: Protected types â€?only superAdmin
   if (PROTECTED_RESOURCE_TYPES.has(resourceType) && !context.superAdmin) {
     return false;
   }
 
-  // Rule 2: No AccessPolicy â†’ allow all (superAdmin or system operations)
+  // Rule 2: No AccessPolicy â†?allow all (superAdmin or system operations)
   if (!accessPolicy) {
     return true;
   }
@@ -112,7 +112,7 @@ export function supportsInteraction(
 }
 
 // =============================================================================
-// Section 3: Layer 2 â€” Instance-Level Check
+// Section 3: Layer 2 â€?Instance-Level Check
 // =============================================================================
 
 /**
@@ -128,12 +128,12 @@ export function canPerformInteraction(
 ): AccessPolicyResourceEntry | undefined {
   const resourceType = resource.resourceType;
 
-  // Rule 1: Protected types â€” only superAdmin
+  // Rule 1: Protected types â€?only superAdmin
   if (PROTECTED_RESOURCE_TYPES.has(resourceType) && !context.superAdmin) {
     return undefined;
   }
 
-  // Rule 2: No AccessPolicy â†’ allow all
+  // Rule 2: No AccessPolicy â†?allow all
   if (!accessPolicy) {
     return { resourceType: "*" };
   }
@@ -181,7 +181,7 @@ export function buildDefaultAccessPolicy(): ParsedAccessPolicy {
 }
 
 // =============================================================================
-// Section 4b: Layer 3 â€” Search Criteria Injection
+// Section 4b: Layer 3 â€?Search Criteria Injection
 // =============================================================================
 
 /**

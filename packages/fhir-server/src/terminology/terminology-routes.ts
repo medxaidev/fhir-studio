@@ -10,7 +10,7 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
 import { TerminologyService, TerminologyError } from "./terminology-service.js";
 import type { ExpandOptions } from "./terminology-service.js";
 import { FHIR_JSON } from "../fhir/response.js";

@@ -2,15 +2,15 @@
  * OAuth2 Token Endpoint
  *
  * Implements `POST /oauth2/token` with three grant types:
- * - `authorization_code` â€” exchange login code for tokens
- * - `client_credentials` â€” service-to-service authentication
- * - `refresh_token` â€” refresh an expired access token
+ * - `authorization_code` â€?exchange login code for tokens
+ * - `client_credentials` â€?service-to-service authentication
+ * - `refresh_token` â€?refresh an expired access token
  *
  * @module fhir-server/auth
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository, PersistedResource } from "@medxai/fhir-persistence";
+import type { ResourceRepository, PersistedResource } from "fhir-persistence";
 import { timingSafeEqual } from "node:crypto";
 import {
   generateAccessToken,
@@ -120,7 +120,7 @@ async function handleAuthorizationCode(
   }
 
   if (loginContent.granted) {
-    // Code already used â€” revoke the login (prevent replay)
+    // Code already used â€?revoke the login (prevent replay)
     await repo.updateResource({
       ...login,
       revoked: true,
@@ -129,7 +129,7 @@ async function handleAuthorizationCode(
   }
 
   if (!loginContent.membership) {
-    throw new Error("Login has no associated membership â€” call POST /auth/login first");
+    throw new Error("Login has no associated membership â€?call POST /auth/login first");
   }
 
   // Mark as granted

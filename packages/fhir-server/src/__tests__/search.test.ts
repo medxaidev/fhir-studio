@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import type { FastifyInstance } from "fastify";
-import { SearchParameterRegistry } from "@medxai/fhir-persistence";
+import { SearchParameterRegistry } from "fhir-persistence";
 import { createMockRepo, createTestApp, mockPersistedResource } from "./helpers.js";
 import type { MockRepo } from "./helpers.js";
 

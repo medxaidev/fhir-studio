@@ -9,7 +9,7 @@
  * @module fhir-server/fhir
  */
 
-import type { PersistedResource } from "@medxai/fhir-persistence";
+import type { PersistedResource } from "fhir-persistence";
 
 // =============================================================================
 // Section 1: Constants
@@ -37,9 +37,9 @@ export function buildETag(versionId: string): string {
  * Parse an ETag or If-Match header value to extract the versionId.
  *
  * Accepts:
- * - `W/"abc-123"` â†’ `"abc-123"`
- * - `"abc-123"` â†’ `"abc-123"`
- * - `abc-123` â†’ `"abc-123"`
+ * - `W/"abc-123"` â†?`"abc-123"`
+ * - `"abc-123"` â†?`"abc-123"`
+ * - `abc-123` â†?`"abc-123"`
  */
 export function parseETag(etag: string): string {
   let value = etag.trim();

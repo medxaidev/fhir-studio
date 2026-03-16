@@ -1,13 +1,13 @@
 /**
  * OAuth2 Logout Endpoint
  *
- * Implements `GET/POST /oauth2/logout` â€” revokes the current Login session.
+ * Implements `GET/POST /oauth2/logout` â€?revokes the current Login session.
  *
  * @module fhir-server/auth
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
 import { requireAuth } from "./middleware.js";
 
 /**

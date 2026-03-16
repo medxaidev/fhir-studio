@@ -2,8 +2,7 @@
  * FhirEngine Interface Contract
  *
  * Defines the interface that fhir-server programs against.
- * When fhir-engine package is implemented, this local interface will be
- * replaced by: `import type { FhirEngine } from "fhir-engine"`.
+ * Matches the real fhir-engine@0.6.0 API shape.
  *
  * Based on ARCHITECTURE-fhir-server.md §9.2 — Engine Interface Usage.
  *
@@ -13,12 +12,9 @@
 import type {
   Resource,
   PersistedResource,
-  Bundle,
   OperationOutcome,
   HistoryEntry,
-  SearchOptions,
   SearchResult,
-  CapabilityStatement,
 } from "./fhir.js";
 
 // =============================================================================
@@ -31,14 +27,37 @@ import type {
  * Provides access to persistence, runtime, and definitions subsystems.
  */
 export interface FhirEngine {
-  /** CRUD, search, history, bundle operations. */
+  /** CRUD + history operations. */
   persistence: FhirPersistence;
-  /** Validation, FHIRPath, CapabilityStatement generation. */
+  /** Validation + search parameter extraction. */
   runtime: FhirRuntime;
   /** StructureDefinition, ValueSet, SearchParameter registry. */
   definitions: FhirDefinitions;
+  /** Resource types with database tables. */
+  resourceTypes: string[];
+  /** High-level FHIR search — parses query params, executes search, returns results. */
+  search(
+    resourceType: string,
+    queryParams: Record<string, string | string[] | undefined>,
+    options?: { total?: "none" | "estimate" | "accurate" },
+  ): Promise<SearchResult>;
+  /** Return engine health/status information. */
+  status(): FhirEngineStatus;
   /** Stop the engine (cleanup). */
   stop(): Promise<void>;
+}
+
+/**
+ * Engine status information returned by engine.status().
+ */
+export interface FhirEngineStatus {
+  databaseType: string;
+  fhirVersions: string[];
+  resourceTypes: string[];
+  loadedPackages: string[];
+  igAction: string;
+  startedAt: string;
+  plugins: string[];
 }
 
 // =============================================================================
@@ -46,7 +65,7 @@ export interface FhirEngine {
 // =============================================================================
 
 /**
- * Persistence subsystem — CRUD, search, history, bundle.
+ * Persistence subsystem — CRUD, history.
  *
  * All data operations go through this interface. fhir-server never
  * touches the database directly.
@@ -55,18 +74,12 @@ export interface FhirPersistence {
   // ── CRUD ──────────────────────────────────────────────────────────────────
   createResource(resourceType: string, resource: Resource): Promise<PersistedResource>;
   readResource(resourceType: string, id: string): Promise<PersistedResource>;
-  updateResource(resourceType: string, id: string, resource: Resource): Promise<PersistedResource>;
+  updateResource(resourceType: string, resource: Resource, options?: { ifMatch?: string }): Promise<PersistedResource>;
   deleteResource(resourceType: string, id: string): Promise<void>;
 
   // ── History ───────────────────────────────────────────────────────────────
   readHistory(resourceType: string, id: string): Promise<HistoryEntry[]>;
   readVersion(resourceType: string, id: string, versionId: string): Promise<PersistedResource>;
-
-  // ── Search ────────────────────────────────────────────────────────────────
-  searchResources(options: SearchOptions): Promise<SearchResult>;
-
-  // ── Bundle ────────────────────────────────────────────────────────────────
-  processBundle(bundle: Bundle): Promise<Bundle>;
 }
 
 // =============================================================================
@@ -82,17 +95,20 @@ export interface ValidationResult {
 }
 
 /**
- * Runtime subsystem — validation, FHIRPath, capability generation.
+ * Runtime subsystem — validation + search parameter extraction.
  */
 export interface FhirRuntime {
   /** Validate a resource against an optional profile URL. */
-  validate(resource: Resource, profileUrl?: string): Promise<ValidationResult>;
+  validate(resource: unknown, profileUrl?: string): Promise<ValidationResult>;
 
-  /** Evaluate a FHIRPath expression against a resource. */
-  evalFhirPath(expression: string, resource: Resource): unknown[];
+  /** Validate multiple resources. */
+  validateMany?(resources: unknown[]): Promise<ValidationResult[]>;
 
-  /** Generate a CapabilityStatement for the server. */
-  generateCapabilityStatement(baseUrl: string): CapabilityStatement;
+  /** Get search parameters for a resource type. */
+  getSearchParameters?(resourceType: string): unknown[];
+
+  /** Extract search values from a resource. */
+  extractSearchValues?(resource: unknown, params: unknown[]): unknown[];
 }
 
 // =============================================================================
@@ -101,6 +117,8 @@ export interface FhirRuntime {
 
 /**
  * Definitions subsystem — StructureDefinition, ValueSet, SearchParameter lookup.
+ *
+ * Matches fhir-definition DefinitionRegistry.
  */
 export interface FhirDefinitions {
   /** Get a StructureDefinition by canonical URL. */
@@ -109,8 +127,17 @@ export interface FhirDefinitions {
   /** Get a ValueSet by canonical URL. */
   getValueSet(url: string): Resource | undefined;
 
-  /** Get all registered resource type names. */
-  getResourceTypes(): string[];
+  /** Get a CodeSystem by canonical URL. */
+  getCodeSystem?(url: string): Resource | undefined;
+
+  /** Get search parameters for a resource type. */
+  getSearchParameters?(resourceType: string): unknown[];
+
+  /** List all StructureDefinitions. */
+  listStructureDefinitions?(): unknown[];
+
+  /** Get registry statistics. */
+  getStatistics?(): unknown;
 }
 
 // =============================================================================

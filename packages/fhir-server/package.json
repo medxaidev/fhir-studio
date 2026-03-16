@@ -38,7 +38,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc && node ./scripts/esbuild.mjs",
-    "dev": "tsx watch ./src/index.ts",
+    "dev": "tsx watch ./scripts/dev.ts",
     "start": "node ./dist/esm/index.mjs",
     "test": "vitest"
   },
@@ -47,6 +47,7 @@
     "@fastify/helmet": "^13.0.2",
     "@fastify/rate-limit": "^10.3.0",
     "fastify": "5.7.4",
+    "fhir-engine": "^0.6.0",
     "jose": "^6.1.3"
   }
 }

@@ -14,12 +14,12 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository, SearchParameterRegistry } from "@medxai/fhir-persistence";
+import type { ResourceRepository, SearchParameterRegistry } from "fhir-persistence";
 import {
   parseSearchRequest,
-} from "@medxai/fhir-persistence";
-import type { FhirRepository } from "@medxai/fhir-persistence";
-import { processTransaction, processBatch } from "@medxai/fhir-persistence";
+} from "fhir-persistence";
+import type { FhirRepository } from "fhir-persistence";
+import { processTransaction, processBatch } from "fhir-persistence";
 import { FHIR_JSON, buildETag, buildLastModified, parseETag } from "../fhir/response.js";
 import { badRequest, errorToOutcome } from "../fhir/outcomes.js";
 import type { ResourceValidator } from "../app.js";
@@ -85,9 +85,9 @@ const PATIENT_COMPARTMENT_TYPES = [
  * Register FHIR operations and extended routes on a Fastify instance.
  *
  * Expects:
- * - `fastify.repo` â€” ResourceRepository (must be FhirRepository for bundle ops)
- * - `fastify.searchRegistry` â€” SearchParameterRegistry (optional, for conditional ops)
- * - `fastify.resourceValidator` â€” ResourceValidator (optional, for $validate)
+ * - `fastify.repo` â€?ResourceRepository (must be FhirRepository for bundle ops)
+ * - `fastify.searchRegistry` â€?SearchParameterRegistry (optional, for conditional ops)
+ * - `fastify.resourceValidator` â€?ResourceValidator (optional, for $validate)
  */
 export async function fhirOperationsRoutes(fastify: FastifyInstance): Promise<void> {
   const repo = (fastify as any).repo as ResourceRepository & FhirRepository;
@@ -149,7 +149,7 @@ export async function fhirOperationsRoutes(fastify: FastifyInstance): Promise<vo
       }
 
       if (!validator) {
-        // No validator configured â€” return valid
+        // No validator configured â€?return valid
         reply.header("content-type", FHIR_JSON);
         return {
           resourceType: "OperationOutcome",
@@ -543,7 +543,7 @@ function getByPointer(obj: unknown, pointer: string): unknown {
     } else if (typeof current === "object") {
       current = (current as Record<string, unknown>)[seg];
     } else {
-      throw new Error(`Cannot traverse '${pointer}' â€” not an object/array`);
+      throw new Error(`Cannot traverse '${pointer}' â€?not an object/array`);
     }
   }
   return current;

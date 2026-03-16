@@ -5,15 +5,15 @@
  * 1. Project (Super Admin, superAdmin=true)
  * 2. User (admin account with bcrypt password hash)
  * 3. ClientApplication (default OAuth2 client)
- * 4. ProjectMembership (admin â†’ project, admin=true)
- * 5. ProjectMembership (client â†’ project)
+ * 4. ProjectMembership (admin â†?project, admin=true)
+ * 5. ProjectMembership (client â†?project)
  *
  * JsonWebKey is handled separately by `initKeys()`.
  *
  * @module fhir-server/auth
  */
 
-import type { ResourceRepository, PersistedResource } from "@medxai/fhir-persistence";
+import type { ResourceRepository, PersistedResource } from "fhir-persistence";
 import { hash } from "bcryptjs";
 import { generateSecret } from "./keys.js";
 
@@ -94,7 +94,7 @@ export async function seedDatabase(
     secret: clientSecret,
   } as any, config.clientId ? { assignedId: config.clientId } : undefined);
 
-  // 4. Create ProjectMembership (admin user â†’ project)
+  // 4. Create ProjectMembership (admin user â†?project)
   const adminMembership = await repo.createResource({
     resourceType: "ProjectMembership",
     project: { reference: `Project/${project.id}` },
@@ -105,7 +105,7 @@ export async function seedDatabase(
     userName: config.adminEmail,
   } as any);
 
-  // 5. Create ProjectMembership (client â†’ project)
+  // 5. Create ProjectMembership (client â†?project)
   const clientMembership = await repo.createResource({
     resourceType: "ProjectMembership",
     project: { reference: `Project/${project.id}` },

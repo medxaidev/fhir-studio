@@ -2,9 +2,9 @@
  * Terminology Service
  *
  * Implements FHIR terminology operations:
- * - $expand â€” expand a ValueSet into a flat list of codes
- * - $validate-code â€” check if a code belongs to a CodeSystem or ValueSet
- * - $lookup â€” retrieve details about a code in a CodeSystem
+ * - $expand â€?expand a ValueSet into a flat list of codes
+ * - $validate-code â€?check if a code belongs to a CodeSystem or ValueSet
+ * - $lookup â€?retrieve details about a code in a CodeSystem
  *
  * Uses the standard FHIR CRUD via ResourceRepository to read
  * CodeSystem and ValueSet resources.
@@ -12,7 +12,7 @@
  * @module fhir-server/terminology
  */
 
-import type { ResourceRepository } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
 
 // =============================================================================
 // Section 1: Types
@@ -336,10 +336,10 @@ export class TerminologyService {
    * Check subsumption relationship between two codes in a CodeSystem.
    *
    * Returns:
-   * - "equivalent"    â€” codeA and codeB are the same code
-   * - "subsumes"      â€” codeA is an ancestor of codeB
-   * - "subsumed-by"   â€” codeB is an ancestor of codeA
-   * - "not-subsumed"  â€” no hierarchical relationship
+   * - "equivalent"    â€?codeA and codeB are the same code
+   * - "subsumes"      â€?codeA is an ancestor of codeB
+   * - "subsumed-by"   â€?codeB is an ancestor of codeA
+   * - "not-subsumed"  â€?no hierarchical relationship
    */
   async subsumes(
     system: string,
@@ -565,7 +565,7 @@ export class TerminologyService {
             const re = new RegExp(value);
             result = result.filter((c) => re.test(c.code));
           } catch {
-            // Invalid regex â€” skip this filter
+            // Invalid regex â€?skip this filter
           }
           break;
 
@@ -576,7 +576,7 @@ export class TerminologyService {
           break;
 
         default:
-          // Unsupported op â€” no filtering
+          // Unsupported op â€?no filtering
           break;
       }
     }

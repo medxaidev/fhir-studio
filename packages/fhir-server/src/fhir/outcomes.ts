@@ -14,7 +14,7 @@ import {
   ResourceNotFoundError,
   ResourceGoneError,
   ResourceVersionConflictError,
-} from "@medxai/fhir-persistence";
+} from "fhir-persistence";
 
 // =============================================================================
 // Section 1: Types
@@ -137,7 +137,7 @@ export function notSupported(diagnostics: string): OperationOutcome {
 }
 
 // =============================================================================
-// Section 3: Error â†’ OutcomeWithStatus Mapping
+// Section 3: Error â†?OutcomeWithStatus Mapping
 // =============================================================================
 
 /**

@@ -30,23 +30,9 @@ export async function handleSearch(
   try {
     // Extract search params from query string (GET) or body (POST _search)
     const params = extractSearchParams(request);
-    const count = parseInt(params._count ?? "20", 10);
-    const offset = parseInt(params._offset ?? "0", 10);
 
-    // Remove special params before passing to engine
-    const searchParams: Record<string, string | string[]> = {};
-    for (const [key, value] of Object.entries(params)) {
-      if (!key.startsWith("_") || key === "_id" || key === "_tag" || key === "_profile" || key === "_security") {
-        searchParams[key] = value;
-      }
-    }
-
-    const result = await engine.persistence.searchResources({
-      resourceType,
-      params: searchParams,
-      count,
-      offset,
-    });
+    // Use engine.search() high-level API (handles _count, _offset, etc. internally)
+    const result = await engine.search(resourceType, params, { total: "accurate" });
 
     // Build searchset Bundle
     const base = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
@@ -57,6 +43,17 @@ export async function handleSearch(
       resource,
       search: { mode: "match" as const },
     }));
+
+    // Add included resources
+    if (result.included && result.included.length > 0) {
+      for (const inc of result.included) {
+        entries.push({
+          fullUrl: `${base}/${inc.resourceType}/${inc.id}`,
+          resource: inc,
+          search: { mode: "include" as const },
+        });
+      }
+    }
 
     const bundle: Bundle = {
       resourceType: "Bundle",
@@ -69,7 +66,9 @@ export async function handleSearch(
     };
 
     // Add next link if there are more results
-    if (offset + count < result.total) {
+    const count = parseInt(params._count ?? "20", 10);
+    const offset = parseInt(params._offset ?? "0", 10);
+    if (result.total !== undefined && offset + count < result.total) {
       const nextParams = { ...params, _offset: String(offset + count) };
       bundle.link!.push({
         relation: "next",

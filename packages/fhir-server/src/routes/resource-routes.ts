@@ -13,9 +13,9 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository, FhirResource, HistoryOptions, SearchParameterRegistry } from "@medxai/fhir-persistence";
-import type { FhirRepository } from "@medxai/fhir-persistence";
-import { buildHistoryBundle, parseSearchRequest } from "@medxai/fhir-persistence";
+import type { ResourceRepository, FhirResource, HistoryOptions, SearchParameterRegistry } from "fhir-persistence";
+import type { FhirRepository } from "fhir-persistence";
+import { buildHistoryBundle, parseSearchRequest } from "fhir-persistence";
 import { FHIR_JSON, buildETag, buildLastModified, buildLocationHeader, parseETag } from "../fhir/response.js";
 import { allOk, badRequest, errorToOutcome } from "../fhir/outcomes.js";
 import type { ResourceValidator } from "../app.js";
@@ -80,7 +80,7 @@ export async function resourceRoutes(fastify: FastifyInstance): Promise<void> {
 
       const resource: FhirResource = { ...body, resourceType };
 
-      // Validation gate â€” if validator is configured, validate before persistence
+      // Validation gate â€?if validator is configured, validate before persistence
       if (validator) {
         const vResult = await validator(resource as unknown as Record<string, unknown>);
         if (!vResult.valid) {
@@ -215,7 +215,7 @@ export async function resourceRoutes(fastify: FastifyInstance): Promise<void> {
 
       const resource: FhirResource = { ...body, resourceType, id };
 
-      // Validation gate â€” if validator is configured, validate before persistence
+      // Validation gate â€?if validator is configured, validate before persistence
       if (validator) {
         const vResult = await validator(resource as unknown as Record<string, unknown>);
         if (!vResult.valid) {
@@ -338,7 +338,7 @@ export async function resourceRoutes(fastify: FastifyInstance): Promise<void> {
       }
 
       try {
-        // Note: readHistory does not yet accept OperationContext â€” future enhancement
+        // Note: readHistory does not yet accept OperationContext â€?future enhancement
         const entries = await repo.readHistory(resourceType, id, options);
         const baseUrl = getBaseUrl(request);
         const bundle = buildHistoryBundle(entries, {
@@ -361,7 +361,7 @@ export async function resourceRoutes(fastify: FastifyInstance): Promise<void> {
       const { resourceType, id, vid } = request.params;
 
       try {
-        // Note: readVersion does not yet accept OperationContext â€” future enhancement
+        // Note: readVersion does not yet accept OperationContext â€?future enhancement
         const resource = await repo.readVersion(resourceType, id, vid);
         reply
           .header("content-type", FHIR_JSON)
@@ -403,7 +403,7 @@ function getBaseUrl(request: FastifyRequest): string {
 
 /**
  * Parse an If-None-Exist header value into search query parameters.
- * Example: "identifier=http://example.org|123&name=Smith" â†’ { identifier: "...", name: "Smith" }
+ * Example: "identifier=http://example.org|123&name=Smith" â†?{ identifier: "...", name: "Smith" }
  */
 function parseIfNoneExistHeader(header: string): Record<string, string> {
   const params: Record<string, string> = {};

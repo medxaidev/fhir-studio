@@ -9,8 +9,8 @@
 
 import Fastify from "fastify";
 import type { FastifyInstance } from "fastify";
-import type { ResourceRepository } from "@medxai/fhir-persistence";
-import type { SearchParameterRegistry } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
+import type { SearchParameterRegistry } from "fhir-persistence";
 import { resourceRoutes } from "./routes/resource-routes.js";
 import { searchRoutes } from "./routes/search-routes.js";
 import { metadataRoute } from "./routes/metadata-route.js";
@@ -61,13 +61,13 @@ export interface AppOptions {
   repo: ResourceRepository;
   /** System-level repository for auth operations (no project/AccessPolicy restrictions). */
   systemRepo?: ResourceRepository;
-  /** SearchParameterRegistry for search operations. Optional — search disabled if not provided. */
+  /** SearchParameterRegistry for search operations. Optional �?search disabled if not provided. */
   searchRegistry?: SearchParameterRegistry;
   /** Enable Fastify/pino logging. Default: false. */
   logger?: boolean;
   /** Base URL for the server (used in Location headers, Bundle links). */
   baseUrl?: string;
-  /** Optional resource validator — called before create/update. */
+  /** Optional resource validator �?called before create/update. */
   resourceValidator?: ResourceValidator;
   /** Enable auth middleware and routes. Default: false. */
   enableAuth?: boolean;
@@ -114,7 +114,7 @@ export async function createApp(options: AppOptions): Promise<FastifyInstance> {
 
   const app = Fastify({
     logger,
-    bodyLimit: 16_777_216, // 16 MB — explicit FHIR resource size limit
+    bodyLimit: 16_777_216, // 16 MB �?explicit FHIR resource size limit
   });
 
   // ── Decorate with repository and search registry ──────────────────────────
@@ -306,7 +306,7 @@ export async function createApp(options: AppOptions): Promise<FastifyInstance> {
   // Terminology routes ($expand, $validate-code, $lookup)
   await app.register(terminologyRoutes);
 
-  // Admin routes (require auth — each route has its own preHandler)
+  // Admin routes (require auth �?each route has its own preHandler)
   await app.register(adminRoutes);
 
   return app;

@@ -16,8 +16,8 @@ import {
   DatabaseClient,
   FhirRepository,
   SearchParameterRegistry,
-} from "@medxai/fhir-persistence";
-import type { SearchParameterBundle } from "@medxai/fhir-persistence";
+} from "fhir-persistence";
+import type { SearchParameterBundle } from "fhir-persistence";
 import { readFileSync, existsSync } from "fs";
 
 // =============================================================================
@@ -107,7 +107,7 @@ async function waitForAuditEvent(
 // Section 2: AuditEvent Creation Tests
 // =============================================================================
 
-describe("AuditEvent E2E â€” Create", () => {
+describe("AuditEvent E2E â€?Create", () => {
   it("POST Patient creates an AuditEvent with action=C", async () => {
     const createRes = await app.inject({
       method: "POST",
@@ -128,7 +128,7 @@ describe("AuditEvent E2E â€” Create", () => {
   });
 });
 
-describe("AuditEvent E2E â€” Update", () => {
+describe("AuditEvent E2E â€?Update", () => {
   it("PUT Patient creates an AuditEvent with action=U", async () => {
     // Create a Patient first
     const createRes = await app.inject({
@@ -163,7 +163,7 @@ describe("AuditEvent E2E â€” Update", () => {
   });
 });
 
-describe("AuditEvent E2E â€” Delete", () => {
+describe("AuditEvent E2E â€?Delete", () => {
   it("DELETE Patient creates an AuditEvent with action=D", async () => {
     // Create a Patient first
     const createRes = await app.inject({
@@ -192,7 +192,7 @@ describe("AuditEvent E2E â€” Delete", () => {
   });
 });
 
-describe("AuditEvent E2E â€” Structure", () => {
+describe("AuditEvent E2E â€?Structure", () => {
   it("AuditEvent has correct FHIR R4 structure", async () => {
     // Create a resource to trigger audit
     const createRes = await app.inject({

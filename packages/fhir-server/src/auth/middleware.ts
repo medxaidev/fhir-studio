@@ -2,14 +2,14 @@
  * Authentication Middleware
  *
  * Provides Fastify hooks for JWT-based authentication:
- * - `authenticateToken`: onRequest hook â€” parses Bearer token, builds AuthState
- * - `requireAuth`: preHandler hook â€” rejects unauthenticated requests with 401
+ * - `authenticateToken`: onRequest hook â€?parses Bearer token, builds AuthState
+ * - `requireAuth`: preHandler hook â€?rejects unauthenticated requests with 401
  *
  * @module fhir-server/auth
  */
 
 import type { FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository, PersistedResource } from "@medxai/fhir-persistence";
+import type { ResourceRepository, PersistedResource } from "fhir-persistence";
 import { verifyJwt } from "./keys.js";
 import type { AccessTokenClaims } from "./keys.js";
 
@@ -19,7 +19,7 @@ import type { AccessTokenClaims } from "./keys.js";
 
 /**
  * Operation context for multi-tenant scoping and authorization.
- * Mirrors the OperationContext from @medxai/fhir-persistence.
+ * Mirrors the OperationContext from fhir-persistence.
  */
 export interface OperationContext {
   project?: string;
@@ -49,7 +49,7 @@ export interface AuthState {
 
 declare module "fastify" {
   interface FastifyRequest {
-    /** Authentication state â€” set by authenticateToken hook. */
+    /** Authentication state â€?set by authenticateToken hook. */
     authState?: AuthState;
   }
 }
@@ -62,7 +62,7 @@ declare module "fastify" {
  * Build the authenticateToken onRequest hook.
  *
  * This hook runs on every request and attempts to resolve a Bearer token
- * into an AuthState. It does NOT reject unauthenticated requests â€” that is
+ * into an AuthState. It does NOT reject unauthenticated requests â€?that is
  * the job of `requireAuth`.
  *
  * @param systemRepo - A repository with no project/AccessPolicy restrictions.
@@ -73,7 +73,7 @@ export function buildAuthenticateToken(
   return async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
     const authHeader = request.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return; // No token â€” unauthenticated (ok, requireAuth will catch if needed)
+      return; // No token â€?unauthenticated (ok, requireAuth will catch if needed)
     }
 
     const token = authHeader.slice(7);
@@ -122,7 +122,7 @@ export function buildAuthenticateToken(
       // Set auth state on request
       request.authState = { login, project, membership };
     } catch {
-      // Token verification failed or resource not found â€” remain unauthenticated
+      // Token verification failed or resource not found â€?remain unauthenticated
       return;
     }
   };

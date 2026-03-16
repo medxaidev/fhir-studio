@@ -112,7 +112,7 @@ export interface BundleEntry {
 export interface Bundle extends Resource {
   resourceType: "Bundle";
   type: "searchset" | "batch" | "transaction" | "batch-response" | "transaction-response"
-    | "history" | "document" | "message" | "collection" | "subscription-notification";
+  | "history" | "document" | "message" | "collection" | "subscription-notification";
   total?: number;
   link?: BundleLink[];
   entry?: BundleEntry[];
@@ -235,19 +235,22 @@ export interface HistoryEntry {
 // =============================================================================
 
 /**
- * Search options passed to persistence.searchResources().
+ * Search options passed to engine.search().
  */
 export interface SearchOptions {
-  resourceType: string;
-  params: Record<string, string | string[]>;
-  count?: number;
-  offset?: number;
+  /** Total count mode. */
+  total?: "none" | "estimate" | "accurate";
 }
 
 /**
- * Search result returned by persistence.searchResources().
+ * Search result returned by engine.search().
+ * Matches fhir-persistence SearchResult.
  */
 export interface SearchResult {
+  /** Matched resources. */
   resources: PersistedResource[];
-  total: number;
+  /** Included resources from _include/_revinclude. */
+  included?: PersistedResource[];
+  /** Total count (only when total=accurate). */
+  total?: number;
 }

@@ -17,8 +17,8 @@
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readFileSync, existsSync } from "node:fs";
-import { DatabaseClient, FhirRepository, SearchParameterRegistry } from "@medxai/fhir-persistence";
-import type { SearchParameterBundle } from "@medxai/fhir-persistence";
+import { DatabaseClient, FhirRepository, SearchParameterRegistry } from "fhir-persistence";
+import type { SearchParameterBundle } from "fhir-persistence";
 import { createApp, seedDatabase, initKeys, seedConformanceResources } from "../src/index.js";
 import { loadConfig } from "../src/config.js";
 

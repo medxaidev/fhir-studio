@@ -45,9 +45,14 @@ export async function handleBundle(
       return;
     }
 
-    const result = await engine.persistence.processBundle(body);
-
-    reply.status(200).header("content-type", FHIR_JSON).send(result);
+    // v0.1.0: fhir-engine does not expose processBundle().
+    // Batch/transaction support is deferred to v0.2.0.
+    // For now, return 501 Not Implemented.
+    void engine; // suppress unused-var lint
+    reply.status(501).header("content-type", FHIR_JSON).send({
+      resourceType: "OperationOutcome",
+      issue: [{ severity: "error", code: "not-supported", diagnostics: "Bundle processing is not yet supported (planned for v0.2.0)" }],
+    });
   } catch (err) {
     const { status, outcome } = errorToOutcome(err);
     reply.status(status).header("content-type", FHIR_JSON).send(outcome);

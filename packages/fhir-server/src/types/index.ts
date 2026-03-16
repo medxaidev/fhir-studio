@@ -32,6 +32,7 @@ export type {
 // ── FhirEngine Interface Contract ────────────────────────────────────────────
 export type {
   FhirEngine,
+  FhirEngineStatus,
   FhirPersistence,
   FhirRuntime,
   FhirDefinitions,

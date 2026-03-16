@@ -1,13 +1,13 @@
 /**
  * Auth Me Endpoint
  *
- * Implements `GET /auth/me` â€” returns current session details.
+ * Implements `GET /auth/me` â€?returns current session details.
  *
  * @module fhir-server/auth
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
 import { requireAuth } from "./middleware.js";
 
 /**
@@ -39,7 +39,7 @@ export function registerMeRoute(app: FastifyInstance, systemRepo: ResourceReposi
             const user = await systemRepo.readResource("User", userId);
             userProfile = user as Record<string, unknown>;
           } catch {
-            // User not found â€” continue without profile
+            // User not found â€?continue without profile
           }
         }
       }

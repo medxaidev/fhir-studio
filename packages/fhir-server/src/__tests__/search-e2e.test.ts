@@ -1,7 +1,7 @@
 /**
- * Search HTTP E2E Tests â€” Real PostgreSQL (Task 14.4)
+ * Search HTTP E2E Tests â€?Real PostgreSQL (Task 14.4)
  *
- * Full HTTP path tests: Fastify inject() â†’ search routes â†’ real DB.
+ * Full HTTP path tests: Fastify inject() â†?search routes â†?real DB.
  * Verifies the complete search pipeline from HTTP request to Bundle response.
  *
  * Requires `npm run db:init` in fhir-persistence to have been run first.
@@ -18,8 +18,8 @@ import {
   DatabaseClient,
   FhirRepository,
   SearchParameterRegistry,
-} from '@medxai/fhir-persistence';
-import type { SearchParameterBundle, FhirResource } from '@medxai/fhir-persistence';
+} from 'fhir-persistence';
+import type { SearchParameterBundle, FhirResource } from 'fhir-persistence';
 import { createApp } from '../app.js';
 
 // =============================================================================
@@ -127,7 +127,7 @@ async function createPatient(overrides?: Partial<FhirResource>): Promise<FhirRes
 // Section 1: GET /:resourceType search
 // =============================================================================
 
-describe('HTTP Search E2E â€” GET', () => {
+describe('HTTP Search E2E â€?GET', () => {
   let patientId1: string;
   let patientId2: string;
 
@@ -252,7 +252,7 @@ describe('HTTP Search E2E â€” GET', () => {
 // Section 2: POST /:resourceType/_search
 // =============================================================================
 
-describe('HTTP Search E2E â€” POST _search', () => {
+describe('HTTP Search E2E â€?POST _search', () => {
   let patientId: string;
 
   beforeAll(async () => {
@@ -280,10 +280,10 @@ describe('HTTP Search E2E â€” POST _search', () => {
 });
 
 // =============================================================================
-// Section 3: Phase 15 â€” Metadata Search HTTP E2E
+// Section 3: Phase 15 â€?Metadata Search HTTP E2E
 // =============================================================================
 
-describe('HTTP Search E2E â€” Phase 15 metadata params', () => {
+describe('HTTP Search E2E â€?Phase 15 metadata params', () => {
   let taggedPatientId: string;
   let profiledPatientId: string;
   let sourcedPatientId: string;
@@ -373,10 +373,10 @@ describe('HTTP Search E2E â€” Phase 15 metadata params', () => {
 });
 
 // =============================================================================
-// Section 4: Phase 16 â€” _include / _revinclude HTTP E2E
+// Section 4: Phase 16 â€?_include / _revinclude HTTP E2E
 // =============================================================================
 
-describe('HTTP Search E2E â€” Phase 16 _include/_revinclude', () => {
+describe('HTTP Search E2E â€?Phase 16 _include/_revinclude', () => {
   let p16PatientId: string;
   let p16ObservationId: string;
 
@@ -463,10 +463,10 @@ describe('HTTP Search E2E â€” Phase 16 _include/_revinclude', () => {
 });
 
 // =============================================================================
-// Section 5: Phase 17 â€” lookup-table search (name) HTTP E2E
+// Section 5: Phase 17 â€?lookup-table search (name) HTTP E2E
 // =============================================================================
 
-describe('HTTP Search E2E â€” Phase 17 lookup-table search', () => {
+describe('HTTP Search E2E â€?Phase 17 lookup-table search', () => {
   let p17PatientId: string;
 
   beforeAll(async () => {

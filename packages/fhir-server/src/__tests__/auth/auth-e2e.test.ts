@@ -1,14 +1,14 @@
 /**
- * Auth E2E Integration Tests â€” Phase D1
+ * Auth E2E Integration Tests â€?Phase D1
  *
  * Full end-to-end tests with real PostgreSQL:
- * 1. seedDatabase â†’ create Project/User/ClientApplication/Membership
- * 2. initKeys â†’ generate JsonWebKey in DB
- * 3. POST /auth/login â†’ get authorization code
- * 4. POST /oauth2/token â†’ exchange code for tokens
- * 5. Bearer token CRUD â†’ verify OperationContext injection
- * 6. Multi-tenant isolation â†’ Project A cannot see Project B data
- * 7. Unauthenticated requests â†’ 401 when requireAuth is enforced
+ * 1. seedDatabase â†?create Project/User/ClientApplication/Membership
+ * 2. initKeys â†?generate JsonWebKey in DB
+ * 3. POST /auth/login â†?get authorization code
+ * 4. POST /oauth2/token â†?exchange code for tokens
+ * 5. Bearer token CRUD â†?verify OperationContext injection
+ * 6. Multi-tenant isolation â†?Project A cannot see Project B data
+ * 7. Unauthenticated requests â†?401 when requireAuth is enforced
  * 8. client_credentials flow
  * 9. refresh_token rotation
  *
@@ -26,8 +26,8 @@ import {
   DatabaseClient,
   FhirRepository,
   SearchParameterRegistry,
-} from "@medxai/fhir-persistence";
-import type { SearchParameterBundle } from "@medxai/fhir-persistence";
+} from "fhir-persistence";
+import type { SearchParameterBundle } from "fhir-persistence";
 import { createApp } from "../../app.js";
 import { seedDatabase, initKeys, _resetKeysForTesting } from "../../auth/index.js";
 import type { SeedResult } from "../../auth/index.js";
@@ -149,7 +149,7 @@ afterAll(async () => {
       );
       await db.query(`DELETE FROM "${type}" WHERE "content"::text LIKE $1`, [`%${RUN_ID}%`]);
     } catch {
-      /* table may not exist or no matching rows â€” ignore */
+      /* table may not exist or no matching rows â€?ignore */
     }
   }
 
@@ -224,7 +224,7 @@ function authHeaders(token: string): Record<string, string> {
 // Section 1: Seed & Init Verification
 // =============================================================================
 
-describe("Auth E2E â€” Seed & Init", () => {
+describe("Auth E2E â€?Seed & Init", () => {
   it("seedDatabase created all platform resources", () => {
     expect(seedResult.project.id).toBeDefined();
     expect(seedResult.user.id).toBeDefined();
@@ -249,7 +249,7 @@ describe("Auth E2E â€” Seed & Init", () => {
 // Section 2: Login Flow
 // =============================================================================
 
-describe("Auth E2E â€” Login", () => {
+describe("Auth E2E â€?Login", () => {
   it("POST /auth/login with valid credentials returns code", async () => {
     const { loginId, code } = await login();
     expect(loginId).toBeDefined();
@@ -283,7 +283,7 @@ describe("Auth E2E â€” Login", () => {
 // Section 3: Token Exchange
 // =============================================================================
 
-describe("Auth E2E â€” Token Exchange", () => {
+describe("Auth E2E â€?Token Exchange", () => {
   it("authorization_code grant returns access_token + refresh_token", async () => {
     const { code } = await login();
     const tokenRes = await exchangeCode(code);
@@ -372,7 +372,7 @@ describe("Auth E2E â€” Token Exchange", () => {
 // Section 4: Authenticated CRUD
 // =============================================================================
 
-describe("Auth E2E â€” Authenticated CRUD", () => {
+describe("Auth E2E â€?Authenticated CRUD", () => {
   let patientId: string;
 
   beforeAll(async () => {
@@ -469,7 +469,7 @@ describe("Auth E2E â€” Authenticated CRUD", () => {
 // Section 5: Multi-Tenant Isolation
 // =============================================================================
 
-describe("Auth E2E â€” Multi-Tenant Isolation", () => {
+describe("Auth E2E â€?Multi-Tenant Isolation", () => {
   let projectAPatientId: string;
   let projectBToken: string;
 
@@ -589,7 +589,7 @@ describe("Auth E2E â€” Multi-Tenant Isolation", () => {
 // Section 6: Token Response Metadata
 // =============================================================================
 
-describe("Auth E2E â€” Token Response Metadata", () => {
+describe("Auth E2E â€?Token Response Metadata", () => {
   it("token response includes project and profile references", async () => {
     const { code } = await login();
     const res = await app.inject({
@@ -610,10 +610,10 @@ describe("Auth E2E â€” Token Response Metadata", () => {
 // Section 7: Error Cases
 // =============================================================================
 
-describe("Auth E2E â€” Error Cases", () => {
+describe("Auth E2E â€?Error Cases", () => {
   it("invalid Bearer token is silently ignored (no auth state)", async () => {
     // With auth enabled but no requireAuth on resource routes,
-    // invalid token just means no context â€” request still proceeds
+    // invalid token just means no context â€?request still proceeds
     const res = await app.inject({
       method: "GET",
       url: "/healthcheck",

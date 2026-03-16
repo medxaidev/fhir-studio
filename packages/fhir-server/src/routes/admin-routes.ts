@@ -2,12 +2,12 @@
  * Platform Admin Route Handlers
  *
  * Provides management endpoints for platform resources:
- * - POST /admin/projects — Create a new Project
- * - GET /admin/projects/:id — Get Project details
- * - POST /admin/projects/:id/invite — Invite user to project (create ProjectMembership)
- * - GET /admin/projects/:id/members — List project members
- * - POST /admin/clients — Register a new ClientApplication
- * - GET /admin/clients/:id — Get ClientApplication details
+ * - POST /admin/projects �?Create a new Project
+ * - GET /admin/projects/:id �?Get Project details
+ * - POST /admin/projects/:id/invite �?Invite user to project (create ProjectMembership)
+ * - GET /admin/projects/:id/members �?List project members
+ * - POST /admin/clients �?Register a new ClientApplication
+ * - GET /admin/clients/:id �?Get ClientApplication details
  *
  * All routes require authentication. Project creation requires superAdmin.
  * Other routes require project admin or superAdmin.
@@ -16,9 +16,9 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { ResourceRepository } from "@medxai/fhir-persistence";
-import { parseSearchRequest } from "@medxai/fhir-persistence";
-import type { SearchParameterRegistry } from "@medxai/fhir-persistence";
+import type { ResourceRepository } from "fhir-persistence";
+import { parseSearchRequest } from "fhir-persistence";
+import type { SearchParameterRegistry } from "fhir-persistence";
 import { generateSecret } from "../auth/keys.js";
 import { FHIR_JSON } from "../fhir/response.js";
 import { badRequest, errorToOutcome } from "../fhir/outcomes.js";
@@ -32,8 +32,8 @@ import { getOperationContext, requireAuth } from "../auth/middleware.js";
  * Register admin routes on a Fastify instance.
  *
  * Expects:
- * - `fastify.repo` — ResourceRepository (system-level for admin ops)
- * - `fastify.searchRegistry` — SearchParameterRegistry (for member search)
+ * - `fastify.repo` �?ResourceRepository (system-level for admin ops)
+ * - `fastify.searchRegistry` �?SearchParameterRegistry (for member search)
  *
  * All routes use requireAuth preHandler.
  */
@@ -42,7 +42,7 @@ export async function adminRoutes(fastify: FastifyInstance): Promise<void> {
   const systemRepo = ((fastify as any).systemRepo ?? repo) as ResourceRepository;
   const registry = (fastify as any).searchRegistry as SearchParameterRegistry | null;
 
-  // ── POST /admin/projects — Create Project ─────────────────────────────
+  // ── POST /admin/projects �?Create Project ─────────────────────────────
   fastify.post(
     "/admin/projects",
     { preHandler: requireAuth },
@@ -76,7 +76,7 @@ export async function adminRoutes(fastify: FastifyInstance): Promise<void> {
     },
   );
 
-  // ── GET /admin/projects/:id — Get Project details ─────────────────────
+  // ── GET /admin/projects/:id �?Get Project details ─────────────────────
   fastify.get<{ Params: { id: string } }>(
     "/admin/projects/:id",
     { preHandler: requireAuth },
@@ -99,7 +99,7 @@ export async function adminRoutes(fastify: FastifyInstance): Promise<void> {
     },
   );
 
-  // ── POST /admin/projects/:id/invite — Invite user to project ──────────
+  // ── POST /admin/projects/:id/invite �?Invite user to project ──────────
   fastify.post<{ Params: { id: string } }>(
     "/admin/projects/:id/invite",
     { preHandler: requireAuth },
@@ -145,7 +145,7 @@ export async function adminRoutes(fastify: FastifyInstance): Promise<void> {
     },
   );
 
-  // ── GET /admin/projects/:id/members — List project members ────────────
+  // ── GET /admin/projects/:id/members �?List project members ────────────
   fastify.get<{ Params: { id: string } }>(
     "/admin/projects/:id/members",
     { preHandler: requireAuth },
@@ -188,7 +188,7 @@ export async function adminRoutes(fastify: FastifyInstance): Promise<void> {
     },
   );
 
-  // ── POST /admin/clients — Register ClientApplication ──────────────────
+  // ── POST /admin/clients �?Register ClientApplication ──────────────────
   fastify.post(
     "/admin/clients",
     { preHandler: requireAuth },
@@ -229,7 +229,7 @@ export async function adminRoutes(fastify: FastifyInstance): Promise<void> {
     },
   );
 
-  // ── GET /admin/clients/:id — Get ClientApplication details ────────────
+  // ── GET /admin/clients/:id �?Get ClientApplication details ────────────
   fastify.get<{ Params: { id: string } }>(
     "/admin/clients/:id",
     { preHandler: requireAuth },
