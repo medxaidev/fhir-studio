@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "FHIR R4 TypeScript HTTP SDK — zero runtime dependencies, cross-platform (Browser + Node.js 18+)",
   "homepage": "https://github.com/nicefhir/fhir-studio",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": "Fangjun <fangjun20208@gmail.com>",
   "keywords": [
     "typescript",

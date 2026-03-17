@@ -1,0 +1,33 @@
+{
+  "name": "fhir-studio",
+  "version": "0.0.1",
+  "description": "",
+  "homepage": "https://medxai.dev",
+  "license": "MIT",
+  "author": "Fangjun <fangjun20208@gmail.com>",
+  "keywords": [],
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "node scripts/extract-r4-definitions.mjs && node scripts/extract-us-core.mjs",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "extract-r4": "node scripts/extract-r4-definitions.mjs",
+    "extract-us-core": "node scripts/extract-us-core.mjs"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react-swc": "4.2.2",
+    "typescript": "^5.9.3",
+    "vite": "7.3.1",
+    "postcss": "8.5.6",
+    "autoprefixer": "10.4.22",
+    "postcss-preset-env": "10.4.0"
+  }
+}

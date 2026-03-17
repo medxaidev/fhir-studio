@@ -2,8 +2,8 @@
   "name": "fhir-server",
   "version": "0.1.0",
   "description": "FHIR R4 REST API Server",
-  "homepage": "https://medxai.com.cn",
-  "license": "Apache-2.0",
+  "homepage": "https://github.com/nicefhir/fhir-studio",
+  "license": "MIT",
   "author": "Fangjun <fangjun20208@gmail.com>",
   "keywords": [
     "typescript",
@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/medxaidev/medxai.git",
+    "url": "https://github.com/nicefhir/fhir-studio.git",
     "directory": "packages/fhir-server"
   },
   "sideEffects": false,

@@ -1,0 +1,40 @@
+# Source files
+src/
+tsconfig.json
+vitest.config.ts
+
+# Tests
+**/__tests__/
+**/__mocks__/
+*.test.ts
+*.spec.ts
+
+# Build scripts
+scripts/
+
+# Development files
+.vscode/
+.idea/
+*.log
+*.tsbuildinfo
+fhir.config.json
+medxai.config.json
+medxai.config.template.json
+
+# Documentation (keep README.md and CHANGELOG.md)
+devdocs/
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+
+# Misc
+node_modules/
+coverage/
+.DS_Store
+*.swp
+*.swo
+*~
