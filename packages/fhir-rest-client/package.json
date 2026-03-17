@@ -1,5 +1,5 @@
 {
-  "name": "fhir-client",
+  "name": "fhir-rest-client",
   "version": "0.1.0",
   "description": "FHIR R4 TypeScript HTTP SDK — zero runtime dependencies, cross-platform (Browser + Node.js 18+)",
   "homepage": "https://github.com/nicefhir/fhir-studio",
@@ -8,12 +8,16 @@
   "keywords": [
     "typescript",
     "FHIR",
-    "client"
+    "client",
+    "rest",
+    "http",
+    "sdk",
+    "healthcare"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/nicefhir/fhir-studio.git",
-    "directory": "packages/fhir-client"
+    "directory": "packages/fhir-rest-client"
   },
   "sideEffects": false,
   "type": "module",

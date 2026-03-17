@@ -1,4 +1,4 @@
-# Publishing Checklist for fhir-client v0.1.0
+# Publishing Checklist for fhir-rest-client v0.1.0
 
 ## ⚠️ CRITICAL: Entry Point Issue
 
@@ -9,14 +9,16 @@ The build script uses `src/index.ts` as entry point, but the new v0.1.0 architec
 ### Fix Required:
 
 **Option 1: Rename index.new.ts to index.ts (RECOMMENDED)**
+
 ```bash
-cd packages/fhir-client
+cd packages/fhir-rest-client
 mv src/index.ts src/index.old.ts
 mv src/index.new.ts src/index.ts
 ```
 
 **Option 2: Update build script**
 Edit `scripts/esbuild.mjs` line 26:
+
 ```javascript
 entryPoints: ['./src/index.new.ts'],  // Changed from './src/index.ts'
 ```
@@ -24,6 +26,7 @@ entryPoints: ['./src/index.new.ts'],  // Changed from './src/index.ts'
 ## Pre-Publication Checklist
 
 ### 1. Code Quality
+
 - [x] All tests passing (102 tests)
 - [x] Zero runtime dependencies
 - [x] TypeScript strict mode enabled
@@ -32,15 +35,17 @@ entryPoints: ['./src/index.new.ts'],  // Changed from './src/index.ts'
 - [ ] Verify dist/ output exists
 
 ### 2. Package Configuration
+
 - [x] package.json version set to 0.1.0
-- [x] package.json name: "fhir-client"
+- [x] package.json name: "fhir-rest-client"
 - [x] package.json repository URL correct
 - [x] package.json homepage correct
-- [x] License: Apache-2.0
+- [x] License: MIT
 - [x] Files field includes only "dist"
 - [x] Exports configured for ESM/CJS
 
 ### 3. Documentation
+
 - [x] README.md created
 - [x] CHANGELOG.md created
 - [x] API.md created
@@ -48,6 +53,7 @@ entryPoints: ['./src/index.new.ts'],  // Changed from './src/index.ts'
 - [ ] Verify all examples in README work
 
 ### 4. Build Artifacts
+
 - [ ] Run `npm run clean`
 - [ ] Run `npm run build`
 - [ ] Verify dist/esm/index.mjs exists
@@ -57,37 +63,40 @@ entryPoints: ['./src/index.new.ts'],  // Changed from './src/index.ts'
 - [ ] Verify dist/cjs/index.d.ts exists
 
 ### 5. Package Testing
+
 - [ ] Test local installation:
   ```bash
   npm pack
-  # Creates fhir-client-0.1.0.tgz
+  # Creates fhir-rest-client-0.1.0.tgz
   ```
 - [ ] Inspect package contents:
   ```bash
-  tar -tzf fhir-client-0.1.0.tgz
+  tar -tzf fhir-rest-client-0.1.0.tgz
   ```
 - [ ] Verify only dist/ files are included
 - [ ] Test in another project:
   ```bash
-  npm install /path/to/fhir-client-0.1.0.tgz
+  npm install /path/to/fhir-rest-client-0.1.0.tgz
   ```
 
 ### 6. npm Registry Preparation
+
 - [ ] Create npm account (if needed): https://www.npmjs.com/signup
 - [ ] Login: `npm login`
-- [ ] Check package name availability: `npm view fhir-client`
-- [ ] Consider scoped package if name taken: `@nicefhir/fhir-client`
+- [ ] Verify package name available: `npm view fhir-rest-client`
 
 ### 7. Publishing
+
 - [ ] Dry run: `npm publish --dry-run`
 - [ ] Review output carefully
 - [ ] Publish: `npm publish`
-- [ ] Verify on npm: https://www.npmjs.com/package/fhir-client
+- [ ] Verify on npm: https://www.npmjs.com/package/fhir-rest-client
 
 ### 8. Post-Publication
-- [ ] Test installation: `npm install fhir-client`
-- [ ] Create git tag: `git tag fhir-client-v0.1.0`
-- [ ] Push tag: `git push origin fhir-client-v0.1.0`
+
+- [ ] Test installation: `npm install fhir-rest-client`
+- [ ] Create git tag: `git tag fhir-rest-client-v0.1.0`
+- [ ] Push tag: `git push origin fhir-rest-client-v0.1.0`
 - [ ] Create GitHub release with CHANGELOG content
 - [ ] Update project README to link to npm package
 
@@ -114,16 +123,16 @@ npm publish
 
 ```bash
 # Install in test project
-mkdir test-fhir-client
-cd test-fhir-client
+mkdir test-fhir-rest-client
+cd test-fhir-rest-client
 npm init -y
-npm install fhir-client
+npm install fhir-rest-client
 
 # Test ESM import
-node --input-type=module -e "import { FhirClient } from 'fhir-client'; console.log(FhirClient);"
+node --input-type=module -e "import { FhirClient } from 'fhir-rest-client'; console.log(FhirClient);"
 
 # Test CJS require
-node -e "const { FhirClient } = require('fhir-client'); console.log(FhirClient);"
+node -e "const { FhirClient } = require('fhir-rest-client'); console.log(FhirClient);"
 ```
 
 ## Rollback Plan
@@ -131,11 +140,13 @@ node -e "const { FhirClient } = require('fhir-client'); console.log(FhirClient);
 If issues are discovered after publishing:
 
 1. **Deprecate the version:**
+
    ```bash
-   npm deprecate fhir-client@0.1.0 "Critical bug, use 0.1.1 instead"
+   npm deprecate fhir-rest-client@0.1.0 "Critical bug, use 0.1.1 instead"
    ```
 
 2. **Publish fixed version:**
+
    ```bash
    # Fix issues
    # Update version to 0.1.1
@@ -147,6 +158,7 @@ If issues are discovered after publishing:
 ## Known Limitations (Documented in CHANGELOG)
 
 Deferred to v0.2.0:
+
 - WebSocket subscription tests
 - Conditional CRUD operations
 - Advanced search features

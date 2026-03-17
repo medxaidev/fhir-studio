@@ -1,4 +1,4 @@
-# fhir-client API Reference
+# fhir-rest-client API Reference
 
 ## Table of Contents
 
@@ -26,13 +26,13 @@ new FhirClient(options: FhirClientOptions)
 
 ```typescript
 interface FhirClientOptions {
-  baseUrl: string;                    // FHIR server base URL
-  auth?: AuthConfig;                  // Authentication configuration
-  cache?: CacheConfig;                // Cache configuration
-  retry?: RetryConfig;                // Retry configuration
-  batch?: BatchConfig;                // Auto-batch configuration
-  logger?: Logger;                    // Custom logger
-  fetch?: typeof fetch;               // Custom fetch implementation
+  baseUrl: string; // FHIR server base URL
+  auth?: AuthConfig; // Authentication configuration
+  cache?: CacheConfig; // Cache configuration
+  retry?: RetryConfig; // Retry configuration
+  batch?: BatchConfig; // Auto-batch configuration
+  logger?: Logger; // Custom logger
+  fetch?: typeof fetch; // Custom fetch implementation
 }
 ```
 
@@ -51,6 +51,7 @@ create<T extends Resource>(
 ```
 
 **Parameters:**
+
 - `resourceType` - FHIR resource type (e.g., 'Patient')
 - `resource` - Resource object to create
 - `options` - Optional request options
@@ -58,10 +59,11 @@ create<T extends Resource>(
 **Returns:** Created resource with server-assigned ID and metadata
 
 **Example:**
+
 ```typescript
-const patient = await client.create('Patient', {
-  resourceType: 'Patient',
-  name: [{ family: 'Smith', given: ['John'] }]
+const patient = await client.create("Patient", {
+  resourceType: "Patient",
+  name: [{ family: "Smith", given: ["John"] }],
 });
 ```
 
@@ -80,6 +82,7 @@ read<T extends Resource>(
 ```
 
 **Parameters:**
+
 - `resourceType` - FHIR resource type
 - `id` - Resource ID
 - `options` - Optional request options
@@ -87,12 +90,14 @@ read<T extends Resource>(
 **Returns:** The requested resource
 
 **Throws:**
+
 - `ResourceNotFoundError` - If resource doesn't exist
 - `OperationOutcomeError` - For other FHIR errors
 
 **Example:**
+
 ```typescript
-const patient = await client.read('Patient', 'patient-123');
+const patient = await client.read("Patient", "patient-123");
 ```
 
 ---
@@ -111,6 +116,7 @@ update<T extends Resource>(
 ```
 
 **Parameters:**
+
 - `resourceType` - FHIR resource type
 - `id` - Resource ID
 - `resource` - Updated resource object
@@ -119,9 +125,10 @@ update<T extends Resource>(
 **Returns:** Updated resource
 
 **Example:**
+
 ```typescript
 patient.active = false;
-const updated = await client.update('Patient', 'patient-123', patient);
+const updated = await client.update("Patient", "patient-123", patient);
 ```
 
 ---
@@ -140,6 +147,7 @@ patch<T extends Resource>(
 ```
 
 **Parameters:**
+
 - `resourceType` - FHIR resource type
 - `id` - Resource ID
 - `patch` - Array of JSON Patch operations
@@ -148,10 +156,15 @@ patch<T extends Resource>(
 **Returns:** Patched resource
 
 **Example:**
+
 ```typescript
-const patched = await client.patch('Patient', 'patient-123', [
-  { op: 'replace', path: '/active', value: false },
-  { op: 'add', path: '/telecom/-', value: { system: 'phone', value: '555-1234' } }
+const patched = await client.patch("Patient", "patient-123", [
+  { op: "replace", path: "/active", value: false },
+  {
+    op: "add",
+    path: "/telecom/-",
+    value: { system: "phone", value: "555-1234" },
+  },
 ]);
 ```
 
@@ -170,13 +183,15 @@ delete(
 ```
 
 **Parameters:**
+
 - `resourceType` - FHIR resource type
 - `id` - Resource ID
 - `options` - Optional request options
 
 **Example:**
+
 ```typescript
-await client.delete('Patient', 'patient-123');
+await client.delete("Patient", "patient-123");
 ```
 
 ---
@@ -196,6 +211,7 @@ search<T extends Resource>(
 ```
 
 **Parameters:**
+
 - `resourceType` - FHIR resource type (or empty string for system-level search)
 - `params` - Search parameters
 - `options` - Optional request options
@@ -203,12 +219,13 @@ search<T extends Resource>(
 **Returns:** Bundle containing search results
 
 **Example:**
+
 ```typescript
-const bundle = await client.search('Patient', {
-  family: 'Smith',
-  birthdate: 'gt2000-01-01',
-  _sort: 'birthdate',
-  _count: '20'
+const bundle = await client.search("Patient", {
+  family: "Smith",
+  birthdate: "gt2000-01-01",
+  _sort: "birthdate",
+  _count: "20",
 });
 ```
 
@@ -226,14 +243,18 @@ searchByUrl<T extends Resource>(
 ```
 
 **Parameters:**
+
 - `url` - Full search URL
 - `options` - Optional request options
 
 **Returns:** Bundle containing search results
 
 **Example:**
+
 ```typescript
-const nextPage = await client.searchByUrl(bundle.link.find(l => l.relation === 'next')?.url);
+const nextPage = await client.searchByUrl(
+  bundle.link.find((l) => l.relation === "next")?.url,
+);
 ```
 
 ---
@@ -254,20 +275,22 @@ history(
 ```
 
 **Parameters:**
+
 - `resourceType` - Optional resource type (omit for system history)
 - `id` - Optional resource ID (omit for type history)
-- `params` - Optional search parameters (_count, _since, etc.)
+- `params` - Optional search parameters (\_count, \_since, etc.)
 - `options` - Optional request options
 
 **Returns:** Bundle of type 'history'
 
 **Example:**
+
 ```typescript
 // Instance history
-const history = await client.history('Patient', 'patient-123');
+const history = await client.history("Patient", "patient-123");
 
 // Type history
-const typeHistory = await client.history('Patient');
+const typeHistory = await client.history("Patient");
 
 // System history
 const systemHistory = await client.history();
@@ -289,6 +312,7 @@ batch(
 ```
 
 **Parameters:**
+
 - `bundle` - Bundle of type 'batch' or 'transaction'
 - `options` - Optional request options
 
@@ -307,6 +331,7 @@ capabilities(options?: RequestOptions): Promise<CapabilityStatement>
 **Returns:** Server's CapabilityStatement
 
 **Example:**
+
 ```typescript
 const capabilities = await client.capabilities();
 console.log(capabilities.fhirVersion);
@@ -321,7 +346,7 @@ Fluent builder for constructing FHIR search parameters.
 ### Constructor
 
 ```typescript
-new SearchParamsBuilder()
+new SearchParamsBuilder();
 ```
 
 ### Methods
@@ -335,8 +360,9 @@ where(param: string, value: string): SearchParamsBuilder
 ```
 
 **Example:**
+
 ```typescript
-builder.where('family', 'Smith').where('given', 'John')
+builder.where("family", "Smith").where("given", "John");
 ```
 
 ---
@@ -350,8 +376,9 @@ sort(param: string, order?: 'asc' | 'desc'): SearchParamsBuilder
 ```
 
 **Example:**
+
 ```typescript
-builder.sort('birthdate', 'desc')
+builder.sort("birthdate", "desc");
 ```
 
 ---
@@ -365,8 +392,9 @@ count(n: number): SearchParamsBuilder
 ```
 
 **Example:**
+
 ```typescript
-builder.count(20)
+builder.count(20);
 ```
 
 ---
@@ -383,37 +411,39 @@ offset(n: number): SearchParamsBuilder
 
 #### include()
 
-Add _include parameter.
+Add \_include parameter.
 
 ```typescript
 include(resourceType: string, param: string): SearchParamsBuilder
 ```
 
 **Example:**
+
 ```typescript
-builder.include('Patient', 'organization')
+builder.include("Patient", "organization");
 ```
 
 ---
 
 #### revInclude()
 
-Add _revinclude parameter.
+Add \_revinclude parameter.
 
 ```typescript
 revInclude(resourceType: string, param: string): SearchParamsBuilder
 ```
 
 **Example:**
+
 ```typescript
-builder.revInclude('Observation', 'subject')
+builder.revInclude("Observation", "subject");
 ```
 
 ---
 
 #### summary()
 
-Set _summary mode.
+Set \_summary mode.
 
 ```typescript
 summary(mode: 'true' | 'text' | 'data' | 'count' | 'false'): SearchParamsBuilder
@@ -423,15 +453,16 @@ summary(mode: 'true' | 'text' | 'data' | 'count' | 'false'): SearchParamsBuilder
 
 #### elements()
 
-Set _elements (field filtering).
+Set \_elements (field filtering).
 
 ```typescript
 elements(...fields: string[]): SearchParamsBuilder
 ```
 
 **Example:**
+
 ```typescript
-builder.elements('id', 'name', 'birthDate')
+builder.elements("id", "name", "birthDate");
 ```
 
 ---
@@ -462,10 +493,10 @@ new ClientSubscriptionManager(options: SubscriptionManagerOptions)
 
 ```typescript
 interface SubscriptionManagerOptions {
-  wsUrl: string;                    // WebSocket URL
-  token?: string;                   // Authentication token
-  reconnect?: boolean;              // Auto-reconnect (default: true)
-  reconnectInterval?: number;       // Reconnect interval in ms (default: 5000)
+  wsUrl: string; // WebSocket URL
+  token?: string; // Authentication token
+  reconnect?: boolean; // Auto-reconnect (default: true)
+  reconnectInterval?: number; // Reconnect interval in ms (default: 5000)
 }
 ```
 
@@ -702,8 +733,14 @@ interface Resource {
 
 ```typescript
 interface Bundle<T extends Resource = Resource> {
-  resourceType: 'Bundle';
-  type: 'searchset' | 'history' | 'transaction' | 'batch' | 'collection' | 'document';
+  resourceType: "Bundle";
+  type:
+    | "searchset"
+    | "history"
+    | "transaction"
+    | "batch"
+    | "collection"
+    | "document";
   total?: number;
   link?: BundleLink[];
   entry?: BundleEntry<T>[];
@@ -716,12 +753,12 @@ interface Bundle<T extends Resource = Resource> {
 
 ```typescript
 interface OperationOutcome {
-  resourceType: 'OperationOutcome';
+  resourceType: "OperationOutcome";
   issue: OperationOutcomeIssue[];
 }
 
 interface OperationOutcomeIssue {
-  severity: 'fatal' | 'error' | 'warning' | 'information';
+  severity: "fatal" | "error" | "warning" | "information";
   code: string;
   diagnostics?: string;
   expression?: string[];
@@ -742,11 +779,11 @@ type SearchParams = Record<string, string | string[]>;
 
 ```typescript
 interface RequestOptions {
-  signal?: AbortSignal;           // For request cancellation
+  signal?: AbortSignal; // For request cancellation
   headers?: Record<string, string>;
-  skipCache?: boolean;            // Skip cache for this request
-  skipRetry?: boolean;            // Skip retry for this request
-  skipBatch?: boolean;            // Skip auto-batching for this request
+  skipCache?: boolean; // Skip cache for this request
+  skipRetry?: boolean; // Skip retry for this request
+  skipBatch?: boolean; // Skip auto-batching for this request
 }
 ```
 

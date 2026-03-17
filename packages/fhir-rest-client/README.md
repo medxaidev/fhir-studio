@@ -1,9 +1,9 @@
-# fhir-client
+# fhir-rest-client
 
 A modern, type-safe FHIR R4 TypeScript HTTP client with **zero runtime dependencies**.
 
-[![npm version](https://img.shields.io/npm/v/fhir-client.svg)](https://www.npmjs.com/package/fhir-client)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![npm version](https://img.shields.io/npm/v/fhir-rest-client.svg)](https://www.npmjs.com/package/fhir-rest-client)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
 
@@ -21,38 +21,38 @@ A modern, type-safe FHIR R4 TypeScript HTTP client with **zero runtime dependenc
 ## Installation
 
 ```bash
-npm install fhir-client
+npm install fhir-rest-client
 ```
 
 ## Quick Start
 
 ```typescript
-import { FhirClient } from 'fhir-client';
+import { FhirClient } from "fhir-rest-client";
 
 // Create a client
 const client = new FhirClient({
-  baseUrl: 'https://fhir.example.com',
+  baseUrl: "https://fhir.example.com",
   auth: {
-    type: 'bearer',
-    token: 'your-access-token'
-  }
+    type: "bearer",
+    token: "your-access-token",
+  },
 });
 
 // Read a resource
-const patient = await client.read('Patient', 'patient-123');
+const patient = await client.read("Patient", "patient-123");
 console.log(patient.name);
 
 // Search with query builder
-import { SearchParamsBuilder } from 'fhir-client';
+import { SearchParamsBuilder } from "fhir-rest-client";
 
 const params = new SearchParamsBuilder()
-  .where('family', 'Smith')
-  .where('birthdate', 'gt2000-01-01')
-  .sort('birthdate', 'desc')
+  .where("family", "Smith")
+  .where("birthdate", "gt2000-01-01")
+  .sort("birthdate", "desc")
   .count(10)
   .build();
 
-const bundle = await client.search('Patient', params);
+const bundle = await client.search("Patient", params);
 ```
 
 ## Authentication
@@ -61,11 +61,11 @@ const bundle = await client.search('Patient', params);
 
 ```typescript
 const client = new FhirClient({
-  baseUrl: 'https://fhir.example.com',
+  baseUrl: "https://fhir.example.com",
   auth: {
-    type: 'bearer',
-    token: 'your-access-token'
-  }
+    type: "bearer",
+    token: "your-access-token",
+  },
 });
 ```
 
@@ -73,13 +73,13 @@ const client = new FhirClient({
 
 ```typescript
 const client = new FhirClient({
-  baseUrl: 'https://fhir.example.com',
+  baseUrl: "https://fhir.example.com",
   auth: {
-    type: 'client',
-    tokenUrl: 'https://auth.example.com/token',
-    clientId: 'your-client-id',
-    clientSecret: 'your-client-secret'
-  }
+    type: "client",
+    tokenUrl: "https://auth.example.com/token",
+    clientId: "your-client-id",
+    clientSecret: "your-client-secret",
+  },
 });
 ```
 
@@ -87,63 +87,63 @@ const client = new FhirClient({
 
 ```typescript
 const client = new FhirClient({
-  baseUrl: 'https://fhir.example.com',
+  baseUrl: "https://fhir.example.com",
   auth: {
-    type: 'password',
-    tokenUrl: 'https://auth.example.com/token',
-    clientId: 'your-client-id',
-    username: 'user@example.com',
-    password: 'your-password'
-  }
+    type: "password",
+    tokenUrl: "https://auth.example.com/token",
+    clientId: "your-client-id",
+    username: "user@example.com",
+    password: "your-password",
+  },
 });
 ```
 
 ### PKCE (Authorization Code with Proof Key)
 
 ```typescript
-import { FhirClient, generatePkceChallenge } from 'fhir-client';
+import { FhirClient, generatePkceChallenge } from "fhir-rest-client";
 
 const { codeVerifier, codeChallenge } = await generatePkceChallenge();
 
 const client = new FhirClient({
-  baseUrl: 'https://fhir.example.com',
+  baseUrl: "https://fhir.example.com",
   auth: {
-    type: 'pkce',
-    tokenUrl: 'https://auth.example.com/token',
-    authorizeUrl: 'https://auth.example.com/authorize',
-    clientId: 'your-client-id',
-    redirectUri: 'https://yourapp.com/callback',
+    type: "pkce",
+    tokenUrl: "https://auth.example.com/token",
+    authorizeUrl: "https://auth.example.com/authorize",
+    clientId: "your-client-id",
+    redirectUri: "https://yourapp.com/callback",
     codeVerifier,
-    codeChallenge
-  }
+    codeChallenge,
+  },
 });
 
 // After user authorization, exchange code for token
-await client.auth.signIn({ code: 'authorization-code' });
+await client.auth.signIn({ code: "authorization-code" });
 ```
 
 ## CRUD Operations
 
 ```typescript
 // Create
-const newPatient = await client.create('Patient', {
-  resourceType: 'Patient',
-  name: [{ family: 'Smith', given: ['John'] }]
+const newPatient = await client.create("Patient", {
+  resourceType: "Patient",
+  name: [{ family: "Smith", given: ["John"] }],
 });
 
 // Read
-const patient = await client.read('Patient', 'patient-123');
+const patient = await client.read("Patient", "patient-123");
 
 // Update
-patient.telecom = [{ system: 'phone', value: '555-1234' }];
-const updated = await client.update('Patient', 'patient-123', patient);
+patient.telecom = [{ system: "phone", value: "555-1234" }];
+const updated = await client.update("Patient", "patient-123", patient);
 
 // Delete
-await client.delete('Patient', 'patient-123');
+await client.delete("Patient", "patient-123");
 
 // Patch (JSON Patch)
-await client.patch('Patient', 'patient-123', [
-  { op: 'replace', path: '/active', value: false }
+await client.patch("Patient", "patient-123", [
+  { op: "replace", path: "/active", value: false },
 ]);
 ```
 
@@ -151,26 +151,28 @@ await client.patch('Patient', 'patient-123', [
 
 ```typescript
 // Simple search
-const results = await client.search('Patient', { family: 'Smith' });
+const results = await client.search("Patient", { family: "Smith" });
 
 // Fluent query builder
-import { SearchParamsBuilder } from 'fhir-client';
+import { SearchParamsBuilder } from "fhir-rest-client";
 
 const params = new SearchParamsBuilder()
-  .where('family', 'Smith')
-  .where('birthdate', 'gt2000-01-01')
-  .where('active', 'true')
-  .sort('birthdate', 'desc')
+  .where("family", "Smith")
+  .where("birthdate", "gt2000-01-01")
+  .where("active", "true")
+  .sort("birthdate", "desc")
   .count(20)
-  .include('Patient', 'organization')
-  .revInclude('Observation', 'subject')
+  .include("Patient", "organization")
+  .revInclude("Observation", "subject")
   .build();
 
-const bundle = await client.search('Patient', params);
+const bundle = await client.search("Patient", params);
 
 // Pagination
 if (bundle.link) {
-  const nextPage = await client.searchByUrl(bundle.link.find(l => l.relation === 'next')?.url);
+  const nextPage = await client.searchByUrl(
+    bundle.link.find((l) => l.relation === "next")?.url,
+  );
 }
 ```
 
@@ -178,47 +180,47 @@ if (bundle.link) {
 
 ```typescript
 const client = new FhirClient({
-  baseUrl: 'https://fhir.example.com',
+  baseUrl: "https://fhir.example.com",
   cache: {
     enabled: true,
-    maxSize: 1000,        // Max cached items
-    ttl: 300000,          // 5 minutes TTL
-    invalidateOnMutate: true  // Auto-invalidate on create/update/delete
-  }
+    maxSize: 1000, // Max cached items
+    ttl: 300000, // 5 minutes TTL
+    invalidateOnMutate: true, // Auto-invalidate on create/update/delete
+  },
 });
 
 // Reads are cached automatically
-const patient1 = await client.read('Patient', '123'); // Cache miss
-const patient2 = await client.read('Patient', '123'); // Cache hit
+const patient1 = await client.read("Patient", "123"); // Cache miss
+const patient2 = await client.read("Patient", "123"); // Cache hit
 
 // Updates invalidate cache
-await client.update('Patient', '123', updatedPatient); // Cache invalidated
-const patient3 = await client.read('Patient', '123'); // Cache miss
+await client.update("Patient", "123", updatedPatient); // Cache invalidated
+const patient3 = await client.read("Patient", "123"); // Cache miss
 ```
 
 ## Retry & Error Handling
 
 ```typescript
 const client = new FhirClient({
-  baseUrl: 'https://fhir.example.com',
+  baseUrl: "https://fhir.example.com",
   retry: {
     enabled: true,
     maxRetries: 3,
-    baseDelay: 1000,      // 1 second
-    maxDelay: 30000,      // 30 seconds
-    factor: 1.5           // Exponential backoff
-  }
+    baseDelay: 1000, // 1 second
+    maxDelay: 30000, // 30 seconds
+    factor: 1.5, // Exponential backoff
+  },
 });
 
 try {
-  const patient = await client.read('Patient', 'invalid-id');
+  const patient = await client.read("Patient", "invalid-id");
 } catch (error) {
   if (error instanceof ResourceNotFoundError) {
-    console.error('Patient not found');
+    console.error("Patient not found");
   } else if (error instanceof OperationOutcomeError) {
-    console.error('FHIR error:', error.outcome);
+    console.error("FHIR error:", error.outcome);
   } else if (error instanceof NetworkError) {
-    console.error('Network error:', error.message);
+    console.error("Network error:", error.message);
   }
 }
 ```
@@ -227,50 +229,50 @@ try {
 
 ```typescript
 const client = new FhirClient({
-  baseUrl: 'https://fhir.example.com',
+  baseUrl: "https://fhir.example.com",
   batch: {
     enabled: true,
     maxBatchSize: 100,
-    windowMs: 50          // Batch requests within 50ms window
-  }
+    windowMs: 50, // Batch requests within 50ms window
+  },
 });
 
 // These requests are automatically batched into a single Bundle
 const [patient1, patient2, patient3] = await Promise.all([
-  client.read('Patient', '1'),
-  client.read('Patient', '2'),
-  client.read('Patient', '3')
+  client.read("Patient", "1"),
+  client.read("Patient", "2"),
+  client.read("Patient", "3"),
 ]);
 ```
 
 ## WebSocket Subscriptions
 
 ```typescript
-import { ClientSubscriptionManager } from 'fhir-client';
+import { ClientSubscriptionManager } from "fhir-rest-client";
 
 const subscriptionManager = new ClientSubscriptionManager({
-  wsUrl: 'wss://fhir.example.com/ws',
-  token: 'your-token',
+  wsUrl: "wss://fhir.example.com/ws",
+  token: "your-token",
   reconnect: true,
-  reconnectInterval: 5000
+  reconnectInterval: 5000,
 });
 
 // Subscribe to resource updates
-subscriptionManager.on('notification', (event) => {
-  console.log('Resource updated:', event.resource);
+subscriptionManager.on("notification", (event) => {
+  console.log("Resource updated:", event.resource);
 });
 
-subscriptionManager.on('error', (error) => {
-  console.error('Subscription error:', error);
+subscriptionManager.on("error", (error) => {
+  console.error("Subscription error:", error);
 });
 
 await subscriptionManager.connect();
 
 // Subscribe to specific criteria
 await subscriptionManager.subscribe({
-  resourceType: 'Subscription',
-  id: 'subscription-123',
-  criteria: 'Observation?status=final'
+  resourceType: "Subscription",
+  id: "subscription-123",
+  criteria: "Observation?status=final",
 });
 ```
 
@@ -281,6 +283,7 @@ await subscriptionManager.subscribe({
 Main client class for interacting with FHIR servers.
 
 **Methods:**
+
 - `read<T>(type, id, options?)` — Read a resource by ID
 - `create<T>(type, resource, options?)` — Create a new resource
 - `update<T>(type, id, resource, options?)` — Update a resource
@@ -297,14 +300,15 @@ Main client class for interacting with FHIR servers.
 Fluent builder for constructing FHIR search parameters.
 
 **Methods:**
+
 - `where(param, value)` — Add search parameter
 - `sort(param, order?)` — Add sort parameter
 - `count(n)` — Set page size
 - `offset(n)` — Set offset (for servers that support it)
-- `include(resourceType, param)` — Add _include
-- `revInclude(resourceType, param)` — Add _revinclude
-- `summary(mode)` — Set _summary mode
-- `elements(...fields)` — Set _elements
+- `include(resourceType, param)` — Add \_include
+- `revInclude(resourceType, param)` — Add \_revinclude
+- `summary(mode)` — Set \_summary mode
+- `elements(...fields)` — Set \_elements
 - `build()` — Build final SearchParams object
 
 ## TypeScript Support
@@ -318,13 +322,14 @@ import type {
   OperationOutcome,
   FhirClientOptions,
   SearchParams,
-  RequestOptions
-} from 'fhir-client';
+  RequestOptions,
+} from "fhir-rest-client";
 ```
 
 ## Browser Support
 
 Works in all modern browsers with native `fetch` and `crypto` support:
+
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+

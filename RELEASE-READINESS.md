@@ -1,7 +1,7 @@
 # npm 0.1.0 Release Readiness Assessment
 
 **Date:** 2026-03-17  
-**Packages:** fhir-client, fhir-server  
+**Packages:** fhir-rest-client, fhir-server  
 **Target Version:** 0.1.0
 
 ## Executive Summary
@@ -20,29 +20,29 @@
 
 ### fhir-client
 
-| Criterion | Status | Notes |
-|-----------|--------|-------|
-| Tests | ✅ PASS | 102 tests passing |
-| Dependencies | ✅ PASS | Zero runtime dependencies |
-| TypeScript | ✅ PASS | Strict mode, full types |
-| Documentation | ✅ COMPLETE | README, CHANGELOG, API docs |
-| Build Config | ⚠️ NEEDS FIX | Entry point issue |
-| package.json | ✅ CORRECT | v0.1.0, correct metadata |
-| .npmignore | ✅ CREATED | Excludes tests/src |
+| Criterion     | Status       | Notes                       |
+| ------------- | ------------ | --------------------------- |
+| Tests         | ✅ PASS      | 102 tests passing           |
+| Dependencies  | ✅ PASS      | Zero runtime dependencies   |
+| TypeScript    | ✅ PASS      | Strict mode, full types     |
+| Documentation | ✅ COMPLETE  | README, CHANGELOG, API docs |
+| Build Config  | ⚠️ NEEDS FIX | Entry point issue           |
+| package.json  | ✅ CORRECT   | v0.1.0, correct metadata    |
+| .npmignore    | ✅ CREATED   | Excludes tests/src          |
 
 **Readiness:** 95% - Fix entry point, then ready to publish
 
 ### fhir-server
 
-| Criterion | Status | Notes |
-|-----------|--------|-------|
-| Tests | ✅ PASS | 276+ tests passing |
-| Dependencies | ✅ CORRECT | Fastify + plugins |
-| TypeScript | ✅ PASS | Strict mode, full types |
-| Documentation | ✅ COMPLETE | README, CHANGELOG, API docs |
-| Build Config | ⚠️ NEEDS FIX | Entry point issue |
-| package.json | ✅ FIXED | Repository URL corrected |
-| .npmignore | ✅ CREATED | Excludes tests/src/configs |
+| Criterion     | Status       | Notes                       |
+| ------------- | ------------ | --------------------------- |
+| Tests         | ✅ PASS      | 276+ tests passing          |
+| Dependencies  | ✅ CORRECT   | Fastify + plugins           |
+| TypeScript    | ✅ PASS      | Strict mode, full types     |
+| Documentation | ✅ COMPLETE  | README, CHANGELOG, API docs |
+| Build Config  | ⚠️ NEEDS FIX | Entry point issue           |
+| package.json  | ✅ FIXED     | Repository URL corrected    |
+| .npmignore    | ✅ CREATED   | Excludes tests/src/configs  |
 
 **Readiness:** 95% - Fix entry point, then ready to publish
 
@@ -76,7 +76,7 @@
 
 4. **.npmignore** - Excludes:
    - Source files (src/)
-   - Tests (__tests__/, *.test.ts)
+   - Tests (**tests**/, \*.test.ts)
    - Build scripts
    - Dev configs
    - Only publishes dist/
@@ -95,6 +95,7 @@
 ### fhir-server package.json
 
 Fixed inconsistencies:
+
 - ✅ Repository URL: `medxaidev/medxai` → `nicefhir/fhir-studio`
 - ✅ Homepage: `medxai.com.cn` → `github.com/nicefhir/fhir-studio`
 
@@ -103,6 +104,7 @@ Fixed inconsistencies:
 **Note:** Root LICENSE is MIT, but package.json declares Apache-2.0.
 
 **Recommendation:** Decide on one license:
+
 - Keep Apache-2.0 (update root LICENSE)
 - Change to MIT (update package.json)
 
@@ -127,13 +129,14 @@ mv src/index.new.ts src/index.ts
 ### 2. Resolve License Discrepancy
 
 Choose one:
+
 - **Option A:** Use Apache-2.0 (update root LICENSE file)
 - **Option B:** Use MIT (update both package.json files)
 
 ### 3. Build Packages
 
 ```bash
-# fhir-client
+# fhir-rest-client
 cd packages/fhir-client
 npm run clean
 npm run build
@@ -150,18 +153,17 @@ npm pack
 
 ```bash
 # Inspect package contents
-tar -tzf fhir-client-0.1.0.tgz
+tar -tzf fhir-rest-client-0.1.0.tgz
 tar -tzf fhir-server-0.1.0.tgz
 
 # Test installation in separate project
-mkdir test-install
-cd test-install
+mkdir test-install && cd test-install
 npm init -y
-npm install ../packages/fhir-client/fhir-client-0.1.0.tgz
+npm install ../packages/fhir-client/fhir-rest-client-0.1.0.tgz
 npm install ../packages/fhir-server/fhir-server-0.1.0.tgz
 
 # Test imports
-node --input-type=module -e "import { FhirClient } from 'fhir-client'; console.log('✓ fhir-client ESM works');"
+node --input-type=module -e "import { FhirClient } from 'fhir-rest-client'; console.log('✓ fhir-rest-client ESM works');"
 node --input-type=module -e "import { FhirServer } from 'fhir-server'; console.log('✓ fhir-server ESM works');"
 ```
 
@@ -190,9 +192,9 @@ npm publish
 
 ```bash
 # Create git tags
-git tag fhir-client-v0.1.0
+git tag fhir-rest-client-v0.1.0
 git tag fhir-server-v0.1.0
-git push origin fhir-client-v0.1.0
+git push origin fhir-rest-client-v0.1.0
 git push origin fhir-server-v0.1.0
 
 # Create GitHub releases
@@ -203,7 +205,7 @@ git push origin fhir-server-v0.1.0
 
 ## Quality Metrics
 
-### fhir-client
+### fhir-rest-client
 
 - **Test Coverage:** 102 tests across 6 test files
 - **Architecture:** 10-layer modular design
@@ -227,13 +229,16 @@ git push origin fhir-server-v0.1.0
 
 Both packages defer these features to v0.2.0:
 
-### fhir-client
+### fhir-rest-client
+
 - WebSocket subscription tests
 - Conditional CRUD operations
 - Advanced search features
 - Resource builder utilities
+- Support for multiple FHIR versions
 
 ### fhir-server
+
 - WebSocket subscription endpoint
 - OAuth2 token/login routes
 - Transaction bundle processing
@@ -247,17 +252,20 @@ Both packages defer these features to v0.2.0:
 ## Risk Assessment
 
 ### Low Risk ✅
+
 - Core functionality well-tested
 - No breaking changes (new package)
 - Documentation complete
 - Build process established
 
 ### Medium Risk ⚠️
+
 - First public release (no user feedback yet)
 - Old code still in codebase (not used, but present)
 - fhir-engine dependency (external)
 
 ### Mitigation
+
 - Comprehensive testing before publish
 - Clear documentation of limitations
 - Deprecation strategy if issues found

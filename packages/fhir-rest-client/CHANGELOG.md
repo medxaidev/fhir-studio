@@ -10,12 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Features
+
 - **FhirClient** main class with complete FHIR R4 REST API support
 - Zero runtime dependencies - fully self-contained
 - Cross-platform support (Browser + Node.js 18+)
 - Full TypeScript support with comprehensive type definitions
 
 #### Authentication (AUTH-01~03)
+
 - Multiple authentication methods:
   - Bearer token authentication
   - Client credentials flow (OAuth2)
@@ -28,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **PKCE utilities**: `generatePkceChallenge()`, `base64UrlEncode()`
 
 #### CRUD Operations (CLI-01)
+
 - `create()` - Create new resources
 - `read()` - Read resources by ID
 - `update()` - Update existing resources
@@ -36,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `capabilities()` - Fetch server CapabilityStatement
 
 #### Search & Query (CLI-02, QUERY-01)
+
 - `search()` - Type-level and system-level search
 - `searchByUrl()` - Search by full URL for pagination
 - **SearchParamsBuilder** - Fluent query builder with:
@@ -48,10 +52,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `elements()` - Element filtering
 
 #### History (CLI-02)
+
 - `history()` - Resource version history
 - Instance, type, and system-level history support
 
 #### Caching (CACHE-01~02)
+
 - **LRUCache** - Generic LRU cache with TTL support
 - **ResourceCache** - FHIR-specific caching with:
   - Read and search result caching
@@ -60,18 +66,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Precise invalidation on create/update/delete
 
 #### Retry Logic (RETRY-01)
+
 - **RetryHandler** with exponential backoff
 - Configurable retry attempts and delays
 - Automatic retry on 429 (rate limit) and 5xx errors
 - Exponential backoff with factor 1.5
 
 #### Auto-Batching (BATCH-01)
+
 - **AutoBatcher** for automatic request batching
 - Configurable batch window and max batch size
 - Transparent batching of concurrent requests
 - Automatic Bundle creation and response distribution
 
 #### Subscriptions (SUB-01)
+
 - **ClientSubscriptionManager** for real-time updates
 - WebSocket-based subscriptions
 - Automatic reconnection with configurable interval
@@ -79,6 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for subscription criteria
 
 #### Transport Layer (TRS-01)
+
 - **HttpTransport** - Fetch-based HTTP client
 - Automatic FHIR JSON content-type handling
 - Request/response interceptors
@@ -86,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive error mapping to FHIR OperationOutcome
 
 #### Error Handling (ERR-01)
+
 - **FhirClientError** base class
 - Specialized error types:
   - `OperationOutcomeError` - FHIR OperationOutcome errors
@@ -95,6 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic error mapping from HTTP responses
 
 #### Type System (TYP-01)
+
 - Complete FHIR R4 type definitions:
   - `Resource`, `Bundle`, `BundleEntry`
   - `OperationOutcome`, `OperationOutcomeIssue`
@@ -110,6 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `TokenStorage` interface
 
 #### Testing
+
 - 102 tests passing across 6 test files:
   - `auth-manager.test.ts` - Authentication flows
   - `auto-batcher.test.ts` - Batch processing
@@ -119,6 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `search-params-builder.test.ts` - Query building
 
 #### Package Configuration (PKG-01~04)
+
 - Dual ESM/CJS builds with proper exports
 - Tree-shakeable modules
 - Declaration files with source maps
@@ -128,6 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Architecture
 
 Modular layer-based architecture:
+
 1. **Types Layer** - Type definitions and interfaces
 2. **Error Layer** - Error hierarchy and handling
 3. **Transport Layer** - HTTP communication
@@ -150,10 +165,11 @@ Modular layer-based architecture:
 ### Known Limitations
 
 Deferred to v0.2.0:
+
 - WebSocket subscription tests (require mock WebSocket server)
 - Conditional CRUD operations (If-Match, If-None-Match headers)
 - Advanced search features (chained parameters, composite parameters)
 - Resource builder utilities
 - GraphQL support
 
-[0.1.0]: https://github.com/nicefhir/fhir-studio/releases/tag/fhir-client-v0.1.0
+[0.1.0]: https://github.com/nicefhir/fhir-studio/releases/tag/fhir-rest-client-v0.1.0
