@@ -18,13 +18,17 @@
   flex: 1;
 }
 
-.badge {
+.serverInfo {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 9999px;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-tertiary);
   font-size: var(--font-size-xs);
+}
+
+.serverName {
+  color: var(--color-text-secondary);
   font-weight: 500;
-  background: var(--color-accent-light);
-  color: var(--color-accent);
 }

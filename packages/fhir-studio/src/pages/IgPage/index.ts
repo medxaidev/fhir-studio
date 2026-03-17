@@ -1,0 +1,1 @@
+export { IgPage } from './IgPage';

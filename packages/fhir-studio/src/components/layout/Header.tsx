@@ -1,4 +1,7 @@
+import { useSyncExternalStore } from 'react';
 import { usePage } from '@prismui/react';
+import { StatusDot } from '../ui';
+import { serverStore } from '../../stores/server-store';
 import styles from './Header.module.css';
 
 const PAGE_TITLES: Record<string, string> = {
@@ -10,12 +13,19 @@ const PAGE_TITLES: Record<string, string> = {
 export function Header() {
   const { currentPage } = usePage();
   const title = PAGE_TITLES[currentPage ?? ''] ?? 'FHIR Studio';
+  const state = useSyncExternalStore(serverStore.subscribe, serverStore.getState);
+  const currentServer = serverStore.getCurrentServer();
 
   return (
     <header className={styles.header}>
       <span className={styles.title}>{title}</span>
       <div className={styles.spacer} />
-      <span className={styles.badge}>Phase 001</span>
+      {currentServer && (
+        <div className={styles.serverInfo}>
+          <StatusDot status={state.connectionStatus} size="sm" />
+          <span className={styles.serverName}>{currentServer.name}</span>
+        </div>
+      )}
     </header>
   );
 }

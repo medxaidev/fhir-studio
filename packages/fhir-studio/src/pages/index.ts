@@ -1,3 +1,3 @@
-export { ConnectionsPage } from './ConnectionsPage';
-export { IgPage } from './IgPage';
-export { ResourcesPage } from './ResourcesPage';
+export { ConnectionsPage } from './ConnectionsPage/index';
+export { IgPage } from './IgPage/index';
+export { ResourcesPage } from './ResourcesPage/index';

@@ -1,6 +1,6 @@
-import { PackageIcon } from '../components/icons';
-import { Button } from '../components/ui';
-import styles from './Pages.module.css';
+import { PackageIcon } from '../../components/icons';
+import { Button } from '../../components/ui';
+import styles from './IgPage.module.css';
 
 export function IgPage() {
   return (

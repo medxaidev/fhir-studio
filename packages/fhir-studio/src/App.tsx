@@ -3,6 +3,8 @@ import { PrismUIProvider, usePage } from '@prismui/react';
 import { runtime } from './runtime/setup';
 import { AppLayout } from './components/layout';
 import { ConnectionsPage, IgPage, ResourcesPage } from './pages';
+import { loadConfig } from './lib/config-loader';
+import { serverStore } from './stores/server-store';
 import './styles/globals.css';
 
 const PAGE_MAP: Record<string, React.ComponentType> = {
@@ -19,7 +21,7 @@ function ContentRouter() {
   return <Component />;
 }
 
-function InitPage() {
+function InitApp() {
   const { mount, transition, currentPage } = usePage();
 
   useEffect(() => {
@@ -29,13 +31,18 @@ function InitPage() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const config = loadConfig();
+    serverStore.loadServers(config.servers);
+  }, []);
+
   return null;
 }
 
 export function App() {
   return (
     <PrismUIProvider runtime={runtime}>
-      <InitPage />
+      <InitApp />
       <AppLayout>
         <ContentRouter />
       </AppLayout>

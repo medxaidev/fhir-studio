@@ -1,6 +1,6 @@
-import { DatabaseIcon } from '../components/icons';
-import { Button } from '../components/ui';
-import styles from './Pages.module.css';
+import { DatabaseIcon } from '../../components/icons';
+import { Button } from '../../components/ui';
+import styles from './ResourcesPage.module.css';
 
 export function ResourcesPage() {
   return (
