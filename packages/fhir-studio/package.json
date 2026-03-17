@@ -9,14 +9,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/extract-r4-definitions.mjs && node scripts/extract-us-core.mjs",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "extract-r4": "node scripts/extract-r4-definitions.mjs",
-    "extract-us-core": "node scripts/extract-us-core.mjs"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@monaco-editor/react": "^4.7.0",
+    "@prismui/core": "0.4.0",
+    "@prismui/react": "0.4.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
