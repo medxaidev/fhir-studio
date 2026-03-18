@@ -14,6 +14,7 @@ import {
   FHIR_JSON,
   buildLocationHeader,
   buildResourceHeaders,
+  parseETag,
 } from "../error/response.js";
 import { allOk, errorToOutcome } from "../error/outcomes.js";
 
@@ -67,21 +68,48 @@ export async function handleCreate(
 /**
  * GET /:resourceType/:id → Read a resource.
  */
+/** Conformance resource types that benefit from caching. */
+const CONFORMANCE_TYPES = new Set([
+  "StructureDefinition", "ValueSet", "CodeSystem",
+  "ImplementationGuide", "SearchParameter", "CapabilityStatement",
+  "OperationDefinition", "CompartmentDefinition", "NamingSystem",
+]);
+
 export async function handleRead(
   engine: FhirEngine,
   resourceType: string,
   id: string,
   reply: FastifyReply,
+  request?: FastifyRequest,
 ): Promise<void> {
   try {
     const resource = await engine.persistence.readResource(resourceType, id);
     const h = buildResourceHeaders(resource);
-    reply
+
+    // Task 4.3: If-None-Match → 304 Not Modified
+    if (request) {
+      const ifNoneMatch = request.headers["if-none-match"] as string | undefined;
+      if (ifNoneMatch) {
+        const clientVersion = parseETag(ifNoneMatch);
+        if (clientVersion === resource.meta.versionId) {
+          reply.status(304).header("etag", h.etag).send();
+          return;
+        }
+      }
+    }
+
+    const r = reply
       .status(200)
       .header("content-type", h["content-type"])
       .header("etag", h.etag)
-      .header("last-modified", h["last-modified"])
-      .send(resource);
+      .header("last-modified", h["last-modified"]);
+
+    // Task 4.3: Cache-Control for conformance resources
+    if (CONFORMANCE_TYPES.has(resourceType)) {
+      r.header("cache-control", "max-age=3600, must-revalidate");
+    }
+
+    r.send(resource);
   } catch (err) {
     const { status, outcome } = errorToOutcome(err);
     reply.status(status).header("content-type", FHIR_JSON).send(outcome);

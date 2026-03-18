@@ -5,17 +5,74 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-03-18
+
+### Added
+
+#### Phase 004: IG & Terminology API Layer
+
+- **IG Aggregate Routes** (`/_ig/` prefix) — Task 4.1
+  - `GET /_ig/:igId/index` — Returns grouped IG content index (profiles, extensions, valueSets, codeSystems, searchParameters)
+  - `GET /_ig/:igId/structure/:sdId` — Returns full StructureDefinition + extracted dependencies array
+  - `POST /_ig/:igId/bundle` — Batch load multiple resources as FHIR Collection Bundle
+
+- **Admin IG Routes** (`/_admin/ig/` prefix) — Task 4.2
+  - `POST /_admin/ig/import` — Import a FHIR Bundle as an IG (delegates to `IGImportOrchestrator`)
+  - `GET /_admin/ig/list` — List all imported IGs
+
+- **ETag / Cache-Control for Conformance Resources** — Task 4.3
+  - `If-None-Match` → `304 Not Modified` support on resource reads
+  - `Cache-Control: max-age=3600, must-revalidate` for conformance resource types (StructureDefinition, ValueSet, CodeSystem, ImplementationGuide, SearchParameter, etc.)
+  - ETag headers on all resource reads (based on `meta.versionId`)
+
+- **CodeSystem Tree API** — Task 4.5
+  - `GET /_terminology/codesystem/:id/tree` — Returns nested CodeSystem concept hierarchy
+
+- **FhirConformance Interface** — Engine extension for IG management
+  - `getIGIndex()`, `importIG()`, `listIGs()`
+  - `getExpansionCache()`, `upsertExpansionCache()`, `invalidateExpansionCache()`
+  - `getConceptTree()`, `getConceptChildren()`
+  - `ensureTables()`
+
+- **Conformance Type Definitions**
+  - `IGResourceMapEntry`, `IGIndex`, `IGImportResult`
+  - `CachedExpansion`, `ConceptHierarchyEntry`
+  - `FhirConformance` interface on `FhirEngine`
+
+#### Testing
+
+- 24 new tests for Phase 004 routes (all passing)
+  - IG aggregate routes: 10 tests
+  - Admin IG routes: 5 tests
+  - ETag/Cache-Control: 5 tests
+  - CodeSystem tree: 4 tests
+
+### Changed
+
+- **FhirEngine interface** — Added optional `conformance?: FhirConformance` property
+- **handleRead()** — Now accepts optional `request` parameter for `If-None-Match` support
+- **fhirRouter** — Registers Phase 004 routes (`/_ig`, `/_admin/ig`, `/_terminology`)
+
+### Dependencies
+
+- Requires `fhir-engine` ^0.6.2 (with conformance module)
+- Upstream: `fhir-persistence` v0.7.0 (conformance repos), `fhir-runtime` v0.11.0 (extraction APIs)
+
+---
+
 ## [0.1.0] - 2026-03-17
 
 ### Added
 
 #### Core Features
+
 - **FhirServer** class - Complete FHIR R4 REST API server
 - Built on Fastify for high performance
 - Full TypeScript support with comprehensive type definitions
 - Pluggable fhir-engine architecture
 
 #### Server Core (SRV-01)
+
 - **FhirServer** main class with:
   - `start()` - Start the server
   - `stop()` - Graceful shutdown
@@ -25,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Graceful shutdown handling
 
 #### Error Handling (ERR-01~04)
+
 - **FhirServerError** hierarchy:
   - `BadRequestError` (400)
   - `UnauthorizedError` (401)
@@ -51,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Error handler**: `fhirErrorHandler()` - Global Fastify error handler
 
 #### Middleware (MW-01~05)
+
 - **Security headers** (`registerSecurityHeaders`) - Helmet integration
 - **CORS** (`registerCors`) - Configurable cross-origin support
 - **Rate limiting** (`registerRateLimit`) - Token bucket algorithm
@@ -58,6 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Request context** (`registerRequestContext`) - FHIR content-type parsing
 
 #### Authentication (AUTH-01~05)
+
 - **JWT authentication** with configurable algorithms
 - **Access policies** - Three-layer access control:
   - System-level permissions
@@ -70,6 +130,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public path exemptions
 
 #### Router (RTR-01)
+
 - **fhirRouter** - Complete FHIR REST API routing:
   - `GET /metadata` - CapabilityStatement
   - `POST /{type}` - Create
@@ -90,6 +151,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `GET /ValueSet/$validate-code` - Validate code
 
 #### Controllers (CTL-01~04)
+
 - **CrudController** - CRUD operations
   - Create with conditional create support
   - Read with version support
@@ -110,6 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Transaction support (deferred to v0.2.0)
 
 #### Operations (OPS-01~04)
+
 - **$validate** - Resource validation
   - Instance validation
   - Type validation
@@ -120,6 +183,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `$validate-code` - Validate code against ValueSet
 
 #### Capability Statement (CAP-01~02)
+
 - **generateCapabilityStatement()** - Dynamic capability generation
   - Delegates to fhir-engine when available
   - Fallback implementation
@@ -128,6 +192,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **cacheCapabilityStatement()** - ETag-based caching
 
 #### Subscriptions (SUB-01)
+
 - **SubscriptionManager** - Real-time notifications
   - `evaluateResource()` - Evaluate resource against subscriptions
   - Event-based notification system
@@ -135,6 +200,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - WebSocket support (deferred to v0.2.0)
 
 #### Type System
+
 - Complete FHIR R4 type definitions:
   - `Resource`, `PersistedResource`
   - `Bundle`, `BundleEntry`, `BundleLink`
@@ -154,6 +220,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `AuthConfig`, `CorsConfig`, `RateLimitConfig`
 
 #### Testing
+
 - 276+ tests passing across 15+ test files:
   - Router integration tests
   - Controller unit tests
@@ -164,6 +231,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Subscription tests
 
 #### Package Configuration (PKG-01~04)
+
 - Dual ESM/CJS builds with proper exports
 - Tree-shakeable modules
 - Declaration files with source maps
@@ -178,6 +246,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Architecture
 
 Layer-based architecture over fhir-engine:
+
 1. **Types Layer** - Type definitions and interfaces
 2. **Error Layer** - Error hierarchy and OperationOutcome builders
 3. **Middleware Layer** - Security, CORS, rate limiting, logging
@@ -201,6 +270,7 @@ Layer-based architecture over fhir-engine:
 ### API Alignment
 
 Aligned with fhir-engine v0.6.0 API:
+
 - `engine.search(type, params, options)` - Top-level search method
 - `engine.updateResource(type, resource)` - Resource contains ID
 - Error mapping for fhir-persistence errors:
@@ -211,6 +281,7 @@ Aligned with fhir-engine v0.6.0 API:
 ### Known Limitations
 
 Deferred to v0.2.0:
+
 - SUB-02: WebSocket subscription endpoint
 - SRV-02: FhirEnginePlugin system
 - AUTH-03/04: OAuth2 token and login routes

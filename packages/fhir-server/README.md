@@ -11,11 +11,12 @@ A high-performance FHIR R4 REST API server built on Fastify and fhir-engine.
 - 🔒 **Secure by Default** — Helmet security headers, CORS, rate limiting
 - 🔐 **JWT Authentication** — Built-in JWT auth with access policies
 - 📊 **Full FHIR R4 REST API** — Complete implementation of FHIR REST operations
-- 🔍 **Advanced Search** — Full search parameter support with _include/_revinclude
+- 🔍 **Advanced Search** — Full search parameter support with \_include/\_revinclude
 - 📜 **Resource History** — Complete version history tracking
 - 🔄 **Subscriptions** — Real-time resource change notifications
 - 🎯 **Validation** — $validate operation with OperationOutcome
-- 📚 **Terminology** — $expand, $lookup, $validate-code operations
+- 📚 **Terminology** — $expand, $lookup, $validate-code, CodeSystem tree
+- 📦 **IG Management** — Import, index, and browse ImplementationGuide resources
 - 🔌 **Pluggable Engine** — Works with any fhir-engine implementation
 - 📝 **Request Logging** — Comprehensive request/response logging
 - 🎨 **Type-Safe** — Full TypeScript support
@@ -29,8 +30,8 @@ npm install fhir-server fhir-engine
 ## Quick Start
 
 ```typescript
-import { FhirServer } from 'fhir-server';
-import { createFhirEngine } from 'fhir-engine'; // Your engine implementation
+import { FhirServer } from "fhir-server";
+import { createFhirEngine } from "fhir-engine"; // Your engine implementation
 
 // Create FHIR engine instance
 const engine = await createFhirEngine({
@@ -41,15 +42,15 @@ const engine = await createFhirEngine({
 const server = new FhirServer({
   engine,
   port: 3000,
-  host: '0.0.0.0',
+  host: "0.0.0.0",
   cors: {
     enabled: true,
-    origin: '*'
+    origin: "*",
   },
   auth: {
     enabled: true,
-    jwtSecret: 'your-secret-key'
-  }
+    jwtSecret: "your-secret-key",
+  },
 });
 
 await server.start();
@@ -61,14 +62,14 @@ console.log(`FHIR server running at ${server.getAddress()}`);
 ### Basic Configuration
 
 ```typescript
-import { FhirServer, type FhirServerOptions } from 'fhir-server';
+import { FhirServer, type FhirServerOptions } from "fhir-server";
 
 const options: FhirServerOptions = {
-  engine,                    // Required: FhirEngine instance
-  port: 3000,               // Default: 3000
-  host: '0.0.0.0',          // Default: '0.0.0.0'
-  logger: true,             // Enable request logging
-  trustProxy: true          // If behind reverse proxy
+  engine, // Required: FhirEngine instance
+  port: 3000, // Default: 3000
+  host: "0.0.0.0", // Default: '0.0.0.0'
+  logger: true, // Enable request logging
+  trustProxy: true, // If behind reverse proxy
 };
 
 const server = new FhirServer(options);
@@ -81,12 +82,12 @@ const server = new FhirServer({
   engine,
   cors: {
     enabled: true,
-    origin: ['https://app.example.com', 'https://admin.example.com'],
+    origin: ["https://app.example.com", "https://admin.example.com"],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Location', 'ETag', 'Last-Modified']
-  }
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Location", "ETag", "Last-Modified"],
+  },
 });
 ```
 
@@ -97,10 +98,10 @@ const server = new FhirServer({
   engine,
   rateLimit: {
     enabled: true,
-    max: 100,              // Max requests per window
-    timeWindow: 60000,     // 1 minute window
-    skipOnError: false
-  }
+    max: 100, // Max requests per window
+    timeWindow: 60000, // 1 minute window
+    skipOnError: false,
+  },
 });
 ```
 
@@ -112,10 +113,10 @@ const server = new FhirServer({
   auth: {
     enabled: true,
     jwtSecret: process.env.JWT_SECRET,
-    jwtAlgorithm: 'HS256',
-    requireAuth: true,     // Require auth for all endpoints
-    publicPaths: ['/metadata']  // Paths that don't require auth
-  }
+    jwtAlgorithm: "HS256",
+    requireAuth: true, // Require auth for all endpoints
+    publicPaths: ["/metadata"], // Paths that don't require auth
+  },
 });
 ```
 
@@ -235,6 +236,40 @@ GET /CodeSystem/$lookup?system=http://...&code=123
 GET /ValueSet/$validate-code?url=http://...&code=123
 ```
 
+### IG Management (v0.2.0)
+
+```bash
+# Get IG content index (profiles, extensions, valueSets, codeSystems)
+GET /_ig/{igId}/index
+
+# Get StructureDefinition with extracted dependencies
+GET /_ig/{igId}/structure/{sdId}
+
+# Batch load multiple resources as FHIR Collection Bundle
+POST /_ig/{igId}/bundle
+Content-Type: application/json
+{ "resources": ["StructureDefinition/us-core-patient", "StructureDefinition/us-core-obs"] }
+
+# Import an IG from a FHIR Bundle
+POST /_admin/ig/import
+Content-Type: application/json
+{ "igId": "us-core", "bundle": { "resourceType": "Bundle", "type": "collection", "entry": [...] } }
+
+# List all imported IGs
+GET /_admin/ig/list
+
+# CodeSystem concept tree (nested hierarchy)
+GET /_terminology/codesystem/{id}/tree
+```
+
+#### ETag / Caching
+
+Conformance resources (StructureDefinition, ValueSet, CodeSystem, etc.) include:
+
+- `ETag: W/"{versionId}"` header
+- `Cache-Control: max-age=3600, must-revalidate`
+- `If-None-Match` support → `304 Not Modified`
+
 ## Authentication
 
 ### JWT Token Format
@@ -291,38 +326,40 @@ The server supports real-time subscriptions via WebSocket:
 
 ```typescript
 // Client-side
-const ws = new WebSocket('ws://localhost:3000/ws');
+const ws = new WebSocket("ws://localhost:3000/ws");
 
-ws.on('open', () => {
-  ws.send(JSON.stringify({
-    type: 'subscribe',
-    criteria: 'Observation?status=final'
-  }));
+ws.on("open", () => {
+  ws.send(
+    JSON.stringify({
+      type: "subscribe",
+      criteria: "Observation?status=final",
+    }),
+  );
 });
 
-ws.on('message', (data) => {
+ws.on("message", (data) => {
   const event = JSON.parse(data);
-  console.log('Resource updated:', event.resource);
+  console.log("Resource updated:", event.resource);
 });
 ```
 
 ### Subscription Manager
 
 ```typescript
-import { SubscriptionManager } from 'fhir-server';
+import { SubscriptionManager } from "fhir-server";
 
 const subscriptionManager = new SubscriptionManager({ engine });
 
-subscriptionManager.on('notification', (event) => {
+subscriptionManager.on("notification", (event) => {
   // Handle notification
-  console.log('Subscription triggered:', event);
+  console.log("Subscription triggered:", event);
 });
 
 // Evaluate resource against subscriptions
 await subscriptionManager.evaluateResource({
-  resourceType: 'Observation',
-  id: 'obs-123',
-  status: 'final'
+  resourceType: "Observation",
+  id: "obs-123",
+  status: "final",
 });
 ```
 
@@ -365,14 +402,14 @@ The server returns FHIR-compliant OperationOutcome resources for errors:
 You can register custom Fastify middleware:
 
 ```typescript
-import { FhirServer } from 'fhir-server';
+import { FhirServer } from "fhir-server";
 
 const server = new FhirServer({ engine });
 
 // Access the underlying Fastify instance
-server.app.addHook('onRequest', async (request, reply) => {
+server.app.addHook("onRequest", async (request, reply) => {
   // Custom logic
-  console.log('Request:', request.method, request.url);
+  console.log("Request:", request.method, request.url);
 });
 
 await server.start();
@@ -399,20 +436,31 @@ interface FhirEngine {
   // CRUD
   createResource(type: string, resource: Resource): Promise<PersistedResource>;
   readResource(type: string, id: string): Promise<PersistedResource>;
-  updateResource(type: string, resource: PersistedResource): Promise<PersistedResource>;
+  updateResource(
+    type: string,
+    resource: PersistedResource,
+  ): Promise<PersistedResource>;
   deleteResource(type: string, id: string): Promise<void>;
-  
+
   // Search
-  search(type: string, params: Record<string, string>, options?: SearchOptions): Promise<SearchResult>;
-  
+  search(
+    type: string,
+    params: Record<string, string>,
+    options?: SearchOptions,
+  ): Promise<SearchResult>;
+
   // History
-  historyInstance(type: string, id: string, params?: Record<string, string>): Promise<Bundle>;
+  historyInstance(
+    type: string,
+    id: string,
+    params?: Record<string, string>,
+  ): Promise<Bundle>;
   historyType(type: string, params?: Record<string, string>): Promise<Bundle>;
   historySystem(params?: Record<string, string>): Promise<Bundle>;
-  
+
   // Validation
   validate(resource: Resource): Promise<ValidationResult>;
-  
+
   // Metadata
   status(): Promise<FhirEngineStatus>;
 }
@@ -429,8 +477,8 @@ import type {
   FhirEngine,
   Resource,
   Bundle,
-  OperationOutcome
-} from 'fhir-server';
+  OperationOutcome,
+} from "fhir-server";
 ```
 
 ## Performance

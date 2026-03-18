@@ -15,6 +15,7 @@ import type {
   OperationOutcome,
   HistoryEntry,
   SearchResult,
+  Bundle,
 } from "./fhir.js";
 
 // =============================================================================
@@ -33,6 +34,8 @@ export interface FhirEngine {
   runtime: FhirRuntime;
   /** StructureDefinition, ValueSet, SearchParameter registry. */
   definitions: FhirDefinitions;
+  /** Conformance module — IG resource management (Phase 004). */
+  conformance?: FhirConformance;
   /** Resource types with database tables. */
   resourceTypes: string[];
   /** High-level FHIR search — parses query params, executes search, returns results. */
@@ -164,4 +167,103 @@ export interface FhirEnginePlugin {
   start?(ctx: EngineContext): Promise<void>;
   ready?(ctx: EngineContext): Promise<void>;
   stop?(ctx: EngineContext): Promise<void>;
+}
+
+// =============================================================================
+// Section 6: FhirConformance (Phase 004 — IG management)
+// =============================================================================
+
+/**
+ * IG resource map entry.
+ */
+export interface IGResourceMapEntry {
+  igId: string;
+  resourceType: string;
+  resourceId: string;
+  resourceUrl?: string;
+  resourceName?: string;
+  baseType?: string;
+}
+
+/**
+ * Grouped IG index (profiles, extensions, valueSets, codeSystems, searchParameters).
+ */
+export interface IGIndex {
+  profiles: IGResourceMapEntry[];
+  extensions: IGResourceMapEntry[];
+  valueSets: IGResourceMapEntry[];
+  codeSystems: IGResourceMapEntry[];
+  searchParameters: IGResourceMapEntry[];
+}
+
+/**
+ * IG import result.
+ */
+export interface IGImportResult {
+  igId: string;
+  resourceCount: number;
+  sdIndexCount: number;
+  elementIndexCount: number;
+  conceptCount: number;
+  spIndexCount: number;
+  errors: string[];
+}
+
+/**
+ * Cached expansion entry.
+ */
+export interface CachedExpansion {
+  valuesetUrl: string;
+  version: string;
+  expandedAt: string;
+  codeCount: number;
+  expansionJson: string;
+}
+
+/**
+ * Concept hierarchy entry (CodeSystem tree node).
+ */
+export interface ConceptHierarchyEntry {
+  id: string;
+  codeSystemUrl: string;
+  codeSystemVersion?: string;
+  code: string;
+  display?: string;
+  parentCode?: string;
+  level: number;
+}
+
+/**
+ * Conformance subsystem — IG resource management.
+ *
+ * All conformance data operations go through this interface.
+ * fhir-server never touches conformance tables directly.
+ */
+export interface FhirConformance {
+  /** Get grouped IG index (profiles/extensions/valueSets/codeSystems/searchParameters). */
+  getIGIndex(igId: string): Promise<IGIndex>;
+
+  /** Import a FHIR Bundle as an IG. */
+  importIG(igId: string, bundle: Record<string, unknown>): Promise<IGImportResult>;
+
+  /** List all imported IGs. */
+  listIGs?(): Promise<Array<{ name: string; version: string; status?: string }>>;
+
+  /** Get a cached ValueSet expansion. */
+  getExpansionCache?(url: string, version: string): Promise<CachedExpansion | undefined>;
+
+  /** Write a ValueSet expansion cache entry. */
+  upsertExpansionCache?(url: string, version: string, expansionJson: string, codeCount: number): Promise<void>;
+
+  /** Invalidate a ValueSet expansion cache entry. */
+  invalidateExpansionCache?(url: string, version: string): Promise<void>;
+
+  /** Get CodeSystem concept tree. */
+  getConceptTree?(codeSystemUrl: string): Promise<ConceptHierarchyEntry[]>;
+
+  /** Get direct children of a concept. */
+  getConceptChildren?(codeSystemUrl: string, parentCode: string): Promise<ConceptHierarchyEntry[]>;
+
+  /** Ensure all conformance tables exist. */
+  ensureTables?(): Promise<void>;
 }

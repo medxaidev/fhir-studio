@@ -5,17 +5,23 @@
  * Routes delegate to controller functions which call engine.persistence.
  *
  * Route map (FHIR R4):
- *   GET    /metadata                         → CapabilityStatement
- *   GET    /healthcheck                      → Health check
- *   POST   /                                 → Bundle (transaction/batch)
- *   GET    /:resourceType                    → Search
- *   POST   /:resourceType/_search            → Search (POST)
- *   POST   /:resourceType                    → Create
- *   GET    /:resourceType/:id                → Read
- *   PUT    /:resourceType/:id                → Update
- *   DELETE /:resourceType/:id                → Delete
- *   GET    /:resourceType/:id/_history       → History (instance)
- *   GET    /:resourceType/:id/_history/:vid  → VRead
+ *   GET    /metadata                                → CapabilityStatement
+ *   GET    /healthcheck                             → Health check
+ *   POST   /                                        → Bundle (transaction/batch)
+ *   GET    /_ig/:igId/index                         → IG content index
+ *   GET    /_ig/:igId/structure/:sdId                → SD + dependencies
+ *   POST   /_ig/:igId/bundle                        → Batch load resources
+ *   POST   /_admin/ig/import                        → Import IG bundle
+ *   GET    /_admin/ig/list                           → List imported IGs
+ *   GET    /_terminology/codesystem/:id/tree         → CodeSystem concept tree
+ *   GET    /:resourceType                           → Search
+ *   POST   /:resourceType/_search                   → Search (POST)
+ *   POST   /:resourceType                           → Create
+ *   GET    /:resourceType/:id                       → Read
+ *   PUT    /:resourceType/:id                       → Update
+ *   DELETE /:resourceType/:id                       → Delete
+ *   GET    /:resourceType/:id/_history              → History (instance)
+ *   GET    /:resourceType/:id/_history/:vid         → VRead
  *
  * @module fhir-server/router
  */
@@ -32,6 +38,9 @@ import { handleCreate, handleRead, handleUpdate, handleDelete, handleVRead } fro
 import { handleSearch } from "../controller/search-controller.js";
 import { handleHistoryInstance } from "../controller/history-controller.js";
 import { handleBundle } from "../controller/bundle-controller.js";
+import { igRoutes } from "../ig/ig-routes.js";
+import { adminIGRoutes } from "../ig/admin-ig-routes.js";
+import { terminologyTreeRoutes } from "../ig/terminology-tree-routes.js";
 
 // =============================================================================
 // Section 1: Types
@@ -99,6 +108,11 @@ export async function fhirRouter(
     return { status: "ok", uptime: process.uptime() };
   });
 
+  // ── Phase 004: IG & Terminology routes ───────────────────────────────────────
+  await app.register(igRoutes, { prefix: "/_ig", engine });
+  await app.register(adminIGRoutes, { prefix: "/_admin/ig", engine });
+  await app.register(terminologyTreeRoutes, { prefix: "/_terminology", engine });
+
   // ── POST / (Bundle) ───────────────────────────────────────────────────────
   app.post("/", async (request: FastifyRequest, reply: FastifyReply) => {
     await handleBundle(engine, baseUrl, request, reply);
@@ -124,7 +138,7 @@ export async function fhirRouter(
   // ── GET /:resourceType/:id (Read) ─────────────────────────────────────────
   app.get("/:resourceType/:id", async (request: FastifyRequest<{ Params: ResourceParams }>, reply: FastifyReply) => {
     const { resourceType, id } = request.params;
-    await handleRead(engine, resourceType, id, reply);
+    await handleRead(engine, resourceType, id, reply, request);
   });
 
   // ── PUT /:resourceType/:id (Update) ───────────────────────────────────────
