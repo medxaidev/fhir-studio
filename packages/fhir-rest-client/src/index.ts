@@ -19,8 +19,14 @@ export type {
   RequestOptions,
   ResourceArray,
   BatchQueueEntry,
+  IGSummary,
+  IGIndex,
+  IGResourceRef,
+  IGStructureResult,
 } from './types.js';
 export { FhirClientError } from './types.js';
+export { IGIndexedDBCache } from './cache/ig-indexeddb-cache.js';
+export type { IGCacheEntry } from './cache/ig-indexeddb-cache.js';
 export { ClientSubscriptionManager } from './subscription-manager.js';
 export type {
   SubscriptionManagerOptions,

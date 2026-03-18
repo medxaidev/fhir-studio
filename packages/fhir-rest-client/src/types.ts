@@ -142,6 +142,8 @@ export interface MedXAIClientConfig {
   refreshGracePeriod?: number;
   /** Callback when authentication fails permanently. */
   onUnauthenticated?: () => void;
+  /** Enable L2 IndexedDB cache for IG resources (default: false). */
+  igCacheEnabled?: boolean;
 }
 
 // =============================================================================
@@ -186,7 +188,54 @@ export interface BatchQueueEntry {
 }
 
 // =============================================================================
-// Section 7: Error Types
+// Section 7: IG Types (Phase-fhir-client-005)
+// =============================================================================
+
+/**
+ * Summary of an ImplementationGuide from the server.
+ */
+export interface IGSummary {
+  id: string;
+  url: string;
+  version: string;
+  name: string;
+  title?: string;
+  status: string;
+}
+
+/**
+ * IG content index — lightweight navigation data (no full JSON bodies).
+ */
+export interface IGIndex {
+  igId: string;
+  igVersion: string;
+  profiles: IGResourceRef[];
+  extensions: IGResourceRef[];
+  valueSets: IGResourceRef[];
+  codeSystems: IGResourceRef[];
+  searchParameters: IGResourceRef[];
+}
+
+/**
+ * A lightweight reference to a resource within an IG index.
+ */
+export interface IGResourceRef {
+  id: string;
+  url: string;
+  name: string;
+  type?: string;
+}
+
+/**
+ * Result of loading a StructureDefinition with dependency info.
+ */
+export interface IGStructureResult {
+  sd: FhirResource;
+  dependencies: string[];
+}
+
+// =============================================================================
+// Section 8: Error Types
 // =============================================================================
 
 /**

@@ -276,6 +276,45 @@ await subscriptionManager.subscribe({
 });
 ```
 
+## IG Loading (v0.2.0)
+
+Load and browse ImplementationGuide data with built-in caching and ETag support.
+
+```typescript
+import { MedXAIClient } from "fhir-rest-client";
+
+const client = new MedXAIClient({
+  baseUrl: "http://localhost:8080",
+  igCacheEnabled: true, // Enable L2 IndexedDB cache (optional)
+});
+
+// List all imported IGs
+const igs = await client.loadIGList();
+// → IGSummary[] with id, url, version, name, status
+
+// Load IG content index (profiles, extensions, valueSets, etc.)
+const index = await client.loadIGIndex("us-core");
+// → IGIndex with profiles[], extensions[], valueSets[], codeSystems[]
+
+// Load a StructureDefinition with dependencies
+const result = await client.loadIGStructure("us-core", "us-core-patient");
+// → { sd: StructureDefinition, dependencies: ["http://..."] }
+
+// Batch-load multiple resources (deduplicates cached ones)
+const resources = await client.loadIGBundle("us-core", [
+  "StructureDefinition/us-core-patient",
+  "StructureDefinition/us-core-observation-lab",
+]);
+```
+
+### Cache Layers
+
+| Layer | Storage    | Lifetime      | Invalidation               |
+| ----- | ---------- | ------------- | -------------------------- |
+| L1    | Memory LRU | Session       | Page refresh               |
+| L2    | IndexedDB  | Cross-session | IG version change          |
+| L3    | Server     | Permanent     | ETag / If-None-Match → 304 |
+
 ## API Reference
 
 ### FhirClient

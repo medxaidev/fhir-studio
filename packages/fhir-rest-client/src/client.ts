@@ -21,8 +21,12 @@ import type {
   RequestOptions,
   ResourceArray,
   BatchQueueEntry,
+  IGSummary,
+  IGIndex,
+  IGStructureResult,
 } from "./types.js";
 import { FhirClientError } from "./types.js";
+import { IGIndexedDBCache } from "./cache/ig-indexeddb-cache.js";
 
 // =============================================================================
 // Section 1: Constants
@@ -82,6 +86,9 @@ export class MedXAIClient {
   private autoBatchEnabled = false;
   private autoBatchDelay = 50; // ms
 
+  // L2 IndexedDB cache for IG resources
+  private readonly igCache: IGIndexedDBCache | null;
+
   constructor(config: MedXAIClientConfig) {
     // Strip trailing slash
     this.baseUrl = config.baseUrl.replace(/\/+$/, "");
@@ -93,6 +100,7 @@ export class MedXAIClient {
     this.onUnauthenticated = config.onUnauthenticated;
     this.cache = new LRUCache<CacheEntry>(config.cacheSize ?? 1000);
     this.cacheTime = config.cacheTime ?? (typeof window !== "undefined" ? 60_000 : 0);
+    this.igCache = config.igCacheEnabled ? new IGIndexedDBCache() : null;
   }
 
   // ===========================================================================
@@ -802,6 +810,103 @@ export class MedXAIClient {
   }
 
   // ===========================================================================
+  // IG Loading (Phase-fhir-client-005)
+  // ===========================================================================
+
+  /**
+   * Load all ImplementationGuides from the server.
+   * Returns a normalized list of IG summaries.
+   * Result is cached for the session (L1).
+   *
+   * Calls: `GET /_admin/ig/list`
+   */
+  async loadIGList(): Promise<IGSummary[]> {
+    const url = `${this.baseUrl}/_admin/ig/list`;
+    return this.cachedGet<IGSummary[]>(url);
+  }
+
+  /**
+   * Load IG content index (profiles, extensions, valueSets, etc.).
+   * Used for left-panel navigation in IG Explorer.
+   * Does NOT load full StructureDefinition JSON.
+   *
+   * Calls: `GET /_ig/{igId}/index`
+   * Supports ETag/304 for cache revalidation.
+   */
+  async loadIGIndex(igId: string): Promise<IGIndex> {
+    const url = `${this.baseUrl}/_ig/${igId}/index`;
+    const result = await this.cachedGetWithETag<IGIndex>(url, igId);
+    // After fetching, write to L2 with the resolved igVersion
+    if (this.igCache && result.igVersion) {
+      void this.igCache.set(url, result, igId, result.igVersion);
+    }
+    return result;
+  }
+
+  /**
+   * Load a StructureDefinition with its dependency list.
+   * dependencies[] lists canonical URLs / type names the SD references.
+   * Used for pre-loading type dependencies before runtime expand.
+   *
+   * Calls: `GET /_ig/{igId}/structure/{sdId}`
+   * Supports ETag/304 for cache revalidation.
+   */
+  async loadIGStructure(igId: string, sdId: string): Promise<IGStructureResult> {
+    const url = `${this.baseUrl}/_ig/${igId}/structure/${sdId}`;
+    return this.cachedGetWithETag<IGStructureResult>(url, igId);
+  }
+
+  /**
+   * Batch-load multiple StructureDefinitions in one request.
+   * Reduces round-trips when loading a profile with many type dependencies.
+   * Already-cached resources are not re-requested.
+   *
+   * Calls: `POST /_ig/{igId}/bundle`
+   * Response is a standard FHIR Collection Bundle: `entry[].resource`
+   *
+   * @param igId - The IG identifier.
+   * @param resourceRefs - Array of resource references (e.g., "StructureDefinition/us-core-patient").
+   * @returns Array of loaded resources.
+   */
+  async loadIGBundle(igId: string, resourceRefs: string[]): Promise<FhirResource[]> {
+    // Filter out already-cached resources (L1)
+    const uncached: string[] = [];
+    const results: FhirResource[] = [];
+
+    for (const ref of resourceRefs) {
+      const cacheKey = `${this.baseUrl}/_ig/${igId}/resource/${ref}`;
+      const entry = this.cache.get(cacheKey);
+      if (entry && this.cacheTime > 0 && Date.now() - entry.time <= this.cacheTime) {
+        results.push(entry.value as FhirResource);
+      } else {
+        uncached.push(ref);
+      }
+    }
+
+    if (uncached.length === 0) return results;
+
+    // POST to server for uncached resources
+    const url = `${this.baseUrl}/_ig/${igId}/bundle`;
+    const bundle = await this.request<Bundle>("POST", url, {
+      body: JSON.stringify({ resources: uncached }),
+    });
+
+    // Parse standard FHIR Collection Bundle: entry[].resource
+    const loaded = (bundle.entry ?? []).map(e => e.resource).filter(Boolean) as FhirResource[];
+
+    // Cache each loaded resource
+    if (this.cacheTime > 0) {
+      for (const res of loaded) {
+        const ref = `${res.resourceType}/${res.id}`;
+        const cacheKey = `${this.baseUrl}/_ig/${igId}/resource/${ref}`;
+        this.cache.set(cacheKey, { value: res, time: Date.now() });
+      }
+    }
+
+    return [...results, ...loaded];
+  }
+
+  // ===========================================================================
   // J1: Auto-Batch
   // ===========================================================================
 
@@ -1182,6 +1287,85 @@ export class MedXAIClient {
     return result;
   }
 
+  /**
+   * GET with ETag/If-None-Match support + L2 IndexedDB fallback.
+   * Lookup chain: L1 memory → L2 IndexedDB → server.
+   * If we have a cached ETag, sends If-None-Match.
+   * On 304 → returns cached value and refreshes TTL.
+   * On 200 → stores response + ETag in L1 (and L2 if enabled).
+   */
+  private async cachedGetWithETag<T>(url: string, igId?: string, igVersion?: string): Promise<T> {
+    // L1: Check memory cache
+    const existing = this.cache.get(url);
+    if (existing && this.cacheTime > 0 && Date.now() - existing.time <= this.cacheTime) {
+      return existing.value as T;
+    }
+
+    // L2: Check IndexedDB cache (if enabled)
+    if (this.igCache && !existing) {
+      try {
+        const l2Entry = await this.igCache.get(url);
+        if (l2Entry) {
+          // Promote to L1
+          const cacheEntry: CacheEntry = { value: l2Entry.value, time: Date.now(), etag: l2Entry.etag };
+          if (this.cacheTime > 0) {
+            this.cache.set(url, cacheEntry);
+          }
+          return l2Entry.value as T;
+        }
+      } catch {
+        // L2 failure is non-fatal
+      }
+    }
+
+    // L3: Fetch from server — include If-None-Match if we have a cached ETag
+    await this.refreshIfExpired();
+    const headers = this.buildHeaders();
+    if (existing?.etag) {
+      headers["if-none-match"] = existing.etag;
+    }
+
+    const response = await this.fetchWithRetry(url, {
+      method: "GET",
+      headers,
+    });
+
+    // 304 Not Modified — cache hit, refresh TTL
+    if (response.status === 304 && existing) {
+      existing.time = Date.now();
+      this.cache.set(url, existing);
+      return existing.value as T;
+    }
+
+    // Handle errors
+    if (!response.ok) {
+      const text = await response.text();
+      let body: unknown;
+      try { body = text ? JSON.parse(text) : undefined; } catch { /* ignore */ }
+      const outcome = isOperationOutcome(body) ? body : undefined;
+      const message = outcome?.issue?.[0]?.diagnostics
+        ?? `HTTP ${response.status} ${response.statusText}`;
+      throw new FhirClientError(response.status, message, outcome);
+    }
+
+    // 200 OK — parse body and store with ETag
+    const text = await response.text();
+    const result = JSON.parse(text) as T;
+    const etag = response.headers.get("etag") ?? undefined;
+
+    // Write to L1
+    if (this.cacheTime > 0) {
+      this.cache.set(url, { value: result, time: Date.now(), etag });
+    }
+
+    // Write to L2 (if enabled and igId is provided)
+    if (this.igCache && igId && igVersion) {
+      void this.igCache.set(url, result, igId, igVersion, etag);
+    }
+
+    return result;
+  }
+
   private async fetchWithRetry(
     url: string,
     options: RequestInit,
@@ -1378,6 +1562,7 @@ function bundleToResourceArray<T extends FhirResource>(
 interface CacheEntry {
   value: unknown;
   time: number;
+  etag?: string;
 }
 
 /**

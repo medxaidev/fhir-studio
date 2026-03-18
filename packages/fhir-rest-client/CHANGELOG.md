@@ -5,6 +5,70 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-03-18
+
+### Added
+
+#### Phase 005: IG Data Loading + Layered Cache
+
+- **`loadIGList()`** — Task 5.1
+  - `GET /_admin/ig/list` → returns `IGSummary[]`
+  - Cached in L1 (session-level LRU)
+
+- **`loadIGIndex(igId)`** — Task 5.2
+  - `GET /_ig/{igId}/index` → returns `IGIndex` (profiles, extensions, valueSets, codeSystems, searchParameters)
+  - ETag/If-None-Match support for cache revalidation
+
+- **`loadIGStructure(igId, sdId)`** — Task 5.3
+  - `GET /_ig/{igId}/structure/{sdId}` → returns `IGStructureResult` (full SD + dependencies[])
+  - ETag/304 support — avoids re-downloading unchanged SDs
+
+- **`loadIGBundle(igId, resourceRefs[])`** — Task 5.4
+  - `POST /_ig/{igId}/bundle` → batch-loads multiple resources as FHIR Collection Bundle
+  - L1 cache deduplication — already-cached resources are not re-requested
+  - Parses standard `entry[].resource` format (ADR-002)
+
+- **ETag / If-None-Match Support** — Task 5.5
+  - `CacheEntry` now stores `etag` field
+  - New `cachedGetWithETag()` private method: sends `If-None-Match`, handles 304
+  - Used by `loadIGIndex()` and `loadIGStructure()`
+
+- **IG Type Definitions** — Task 5.6
+  - `IGSummary` — IG summary from server
+  - `IGIndex` — IG content index (lightweight navigation data)
+  - `IGResourceRef` — reference to a resource within an IG
+  - `IGStructureResult` — SD + dependencies result
+  - All types exported from package root
+
+- **L2 IndexedDB Cache** — Task 5.7
+  - `IGIndexedDBCache` class in `src/cache/ig-indexeddb-cache.ts`
+  - DB: `fhir-client-ig-cache`, store: `resources`
+  - Lookup chain: L1 memory → L2 IndexedDB → L3 server
+  - `invalidateIG(igId, version)` for version-aware cache busting
+  - Default disabled; enable via `igCacheEnabled: true` in config
+
+#### Testing
+
+- 14 new tests for IG client methods (all passing)
+  - `loadIGList()`: 2 tests
+  - `loadIGIndex()`: 3 tests
+  - `loadIGStructure()`: 3 tests
+  - `loadIGBundle()`: 3 tests
+  - ETag/If-None-Match: 2 tests
+  - Type exports: 1 test
+
+### Changed
+
+- **`MedXAIClientConfig`** — Added `igCacheEnabled?: boolean` option
+- **`CacheEntry`** — Added optional `etag` field for ETag storage
+
+### Dependencies
+
+- Requires `fhir-server` v0.2.0+ (Phase-fhir-server-004 `/_ig/` routes)
+- Still zero runtime dependencies
+
+---
+
 ## [0.1.0] - 2026-03-17
 
 ### Added
