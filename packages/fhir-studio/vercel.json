@@ -2,7 +2,7 @@
   "buildCommand": "bash debug-build.sh",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "npm install",
+  "installCommand": "npm install --install-links=false",
   "devCommand": "npm run dev",
   "rewrites": [
     {
