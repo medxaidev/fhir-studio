@@ -1,0 +1,17 @@
+{
+  "servers": [
+    {
+      "id": "local",
+      "name": "Local Development",
+      "url": "http://localhost:8080",
+      "description": "Local FHIR server for development"
+    },
+    {
+      "id": "production",
+      "name": "Production Server",
+      "url": "https://your-railway-app.up.railway.app",
+      "description": "Production FHIR server on Railway"
+    }
+  ],
+  "defaultServer": "production"
+}

@@ -1,0 +1,14 @@
+{
+  "fhirVersion": "R4",
+  "database": {
+    "type": "postgres",
+    "url": "$DATABASE_URL"
+  },
+  "packages": {
+    "path": "./fhir-packages"
+  },
+  "igs": [
+    { "name": "hl7.fhir.r4.core", "version": "4.0.1" },
+    { "name": "hl7.fhir.us.core", "version": "6.1.0" }
+  ]
+}

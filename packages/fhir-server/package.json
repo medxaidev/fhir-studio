@@ -39,7 +39,8 @@
     "clean": "rimraf dist",
     "build": "npm run clean && tsc && node ./scripts/esbuild.mjs",
     "dev": "tsx watch ./scripts/dev.ts",
-    "start": "node ./dist/esm/index.mjs",
+    "start": "tsx ./scripts/dev.ts",
+    "start:prod": "tsx ./scripts/dev.ts --config fhir.config.railway.json",
     "test": "vitest"
   },
   "dependencies": {
@@ -51,6 +52,10 @@
     "jose": "^6.1.3"
   },
   "devDependencies": {
-    "fhir-persistence": "file:../../../../../fhir-persistence/coding/fhir-persistence"
+    "fhir-persistence": "file:../../../../../fhir-persistence/coding/fhir-persistence",
+    "rimraf": "^6.0.1",
+    "esbuild": "^0.24.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
   }
 }
