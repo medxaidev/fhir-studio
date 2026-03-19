@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "cd /vercel/path0/packages/fhir-studio && rm -rf node_modules package-lock.json && npm install --no-workspaces",
+  "installCommand": "cd /vercel/path0/packages/fhir-studio && rm -rf node_modules package-lock.json && npm install @prismui/core@0.5.0 @prismui/react@0.5.0 fhir-rest-client@0.3.2 fhir-runtime@0.11.0 && npm install",
   "devCommand": "npm run dev",
   "rewrites": [
     {
