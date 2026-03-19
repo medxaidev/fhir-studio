@@ -3,6 +3,12 @@ node_modules
 *.test.ts
 *.test.js
 __tests__
+src/__tests__
+src/__tests__/**
+**/__tests__
+**/__tests__/**
+src/**/*.test.ts
+src/**/*.test.js
 coverage
 .env.local
 .DS_Store
