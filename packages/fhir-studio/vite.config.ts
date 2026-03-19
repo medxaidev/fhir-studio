@@ -21,6 +21,7 @@ export default defineConfig({
       { find: 'node:url', replacement: path.resolve(__dirname, 'src/lib/node-stubs/url.ts') },
     ],
     conditions: ['browser', 'default'],
+    mainFields: ['module', 'main', 'browser'],
   },
   optimizeDeps: {
     include: ['@prismui/core', '@prismui/react', 'fhir-runtime', 'fhir-rest-client'],
