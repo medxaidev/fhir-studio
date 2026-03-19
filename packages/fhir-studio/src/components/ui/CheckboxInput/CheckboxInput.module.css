@@ -1,0 +1,35 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.labelText {
+  user-select: none;
+}
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.error {
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+}

@@ -23,6 +23,7 @@ export type {
   IGIndex,
   IGResourceRef,
   IGStructureResult,
+  ProfileEntry,
 } from './types.js';
 export { FhirClientError } from './types.js';
 export { IGIndexedDBCache } from './cache/ig-indexeddb-cache.js';

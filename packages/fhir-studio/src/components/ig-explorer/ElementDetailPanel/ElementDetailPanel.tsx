@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { igStore } from '../../../stores/ig-store';
 import type {
   ElementTreeNode,
@@ -6,6 +6,7 @@ import type {
   ExtensionTreeNode,
   ChoiceTreeNode,
   BackboneTreeNode,
+  ConstraintInfo,
 } from '../../../lib/ig-tree-types';
 import { Badge } from '../../ui';
 import styles from './ElementDetailPanel.module.css';
@@ -63,6 +64,9 @@ function ElementDetails({ node }: { node: ElementTreeNode }) {
       <CardinalityRow min={node.min} max={node.max} />
       <MustSupportRow value={node.mustSupport} />
       {node.description && <DetailRow label="Description">{node.description}</DetailRow>}
+      {node.constraints && node.constraints.length > 0 && (
+        <ConstraintsSection constraints={node.constraints} />
+      )}
       {node.binding && <BindingSection binding={node.binding} />}
       {node.fixedValue !== undefined && (
         <DetailRow label="Fixed Value">
@@ -74,6 +78,7 @@ function ElementDetails({ node }: { node: ElementTreeNode }) {
           <pre className={styles.jsonBlock}>{JSON.stringify(node.patternValue, null, 2)}</pre>
         </DetailRow>
       )}
+      <FhirPathSection path={node.path} />
     </>
   );
 }
@@ -189,16 +194,59 @@ function MustSupportRow({ value }: { value: boolean }) {
   );
 }
 
+function ConstraintsSection({ constraints }: { constraints: ConstraintInfo[] }) {
+  return (
+    <div className={styles.detailRow}>
+      <span className={styles.detailLabel}>Constraints</span>
+      <div className={styles.constraintList}>
+        {constraints.map((c) => (
+          <div key={c.key} className={styles.constraintItem}>
+            <span className={styles.constraintKey}>{c.key}</span>
+            <span className={styles.constraintHuman}>{c.human}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function BindingSection({ binding }: { binding: { strength: string; valueSetUrl: string; valueSetName?: string } }) {
+  // Extract ValueSet name from URL if not provided
+  const vsName = binding.valueSetName || extractVsName(binding.valueSetUrl);
+
   return (
     <div className={styles.detailRow}>
       <span className={styles.detailLabel}>Binding</span>
       <div className={styles.bindingBlock}>
         <Badge variant={`binding-${binding.strength}` as never}>{binding.strength}</Badge>
+      </div>
+      <div className={styles.bindingDetail}>
+        <span className={styles.bindingVsName}>{vsName}</span>
         <span className={styles.bindingUrl} title={binding.valueSetUrl}>
-          {binding.valueSetName || binding.valueSetUrl}
+          {binding.valueSetUrl}
         </span>
       </div>
+    </div>
+  );
+}
+
+function extractVsName(url: string): string {
+  // Extract last path segment as display name
+  const parts = url.split('/');
+  return parts[parts.length - 1] || url;
+}
+
+function FhirPathSection({ path }: { path: string }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className={styles.detailRow}>
+      <button className={styles.fhirPathToggle} onClick={() => setExpanded((v) => !v)}>
+        <span className={styles.fhirPathChevron}>{expanded ? '▾' : '▸'}</span>
+        <span className={styles.detailLabel}>FHIRPath</span>
+      </button>
+      {expanded && (
+        <span className={styles.detailValueMono}>{path}</span>
+      )}
     </div>
   );
 }

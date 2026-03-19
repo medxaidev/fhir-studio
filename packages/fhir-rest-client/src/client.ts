@@ -24,6 +24,7 @@ import type {
   IGSummary,
   IGIndex,
   IGStructureResult,
+  ProfileEntry,
 } from "./types.js";
 import { FhirClientError } from "./types.js";
 import { IGIndexedDBCache } from "./cache/ig-indexeddb-cache.js";
@@ -88,6 +89,11 @@ export class MedXAIClient {
 
   // L2 IndexedDB cache for IG resources
   private readonly igCache: IGIndexedDBCache | null;
+
+  /** Get the server base URL. */
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
 
   constructor(config: MedXAIClientConfig) {
     // Strip trailing slash
@@ -824,6 +830,30 @@ export class MedXAIClient {
     const url = `${this.baseUrl}/_admin/ig/list`;
     const result = await this.cachedGet<{ igs: IGSummary[] }>(url);
     return result.igs ?? [];
+  }
+
+  /**
+   * Load supported resource types from the server.
+   * Returns a sorted array of resource type names (e.g. ["Patient", "Observation", ...]).
+   *
+   * Calls: `GET /_admin/ig/resource-types`
+   */
+  async loadResourceTypes(): Promise<string[]> {
+    const url = `${this.baseUrl}/_admin/ig/resource-types`;
+    const result = await this.cachedGet<{ resourceTypes: string[] }>(url);
+    return result.resourceTypes ?? [];
+  }
+
+  /**
+   * Load available profiles for a resource type.
+   * Returns base + IG profiles (e.g. Patient base R4 + US Core Patient).
+   *
+   * Calls: `GET /_admin/ig/profiles-for-type/{type}`
+   */
+  async loadProfilesForType(resourceType: string): Promise<ProfileEntry[]> {
+    const url = `${this.baseUrl}/_admin/ig/profiles-for-type/${resourceType}`;
+    const result = await this.cachedGet<{ type: string; profiles: ProfileEntry[] }>(url);
+    return result.profiles ?? [];
   }
 
   /**

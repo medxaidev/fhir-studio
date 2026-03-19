@@ -227,6 +227,17 @@ export interface IGResourceRef {
 }
 
 /**
+ * A profile entry for a resource type (base + IG profiles).
+ */
+export interface ProfileEntry {
+  id: string;
+  url: string;
+  name: string;
+  title: string;
+  isBase: boolean;
+}
+
+/**
  * Result of loading a StructureDefinition with dependency info.
  */
 export interface IGStructureResult {

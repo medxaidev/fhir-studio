@@ -24,6 +24,8 @@ function InitApp() {
   useEffect(() => {
     const config = loadConfig();
     serverStore.loadServers(config.servers);
+    // Auto-connect to the default server on startup
+    serverStore.testConnection();
   }, []);
 
   return null;

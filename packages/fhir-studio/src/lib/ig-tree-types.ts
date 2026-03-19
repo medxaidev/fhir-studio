@@ -28,6 +28,7 @@ export interface ElementTreeNode extends TreeNodeBase {
   patternValue?: unknown;
   binding?: BindingInfo;
   description?: string;
+  constraints?: ConstraintInfo[];
 }
 
 export interface SliceTreeNode extends TreeNodeBase {
@@ -80,6 +81,11 @@ export type TreeNode =
   | ExtensionTreeNode
   | ChoiceTreeNode
   | BackboneTreeNode;
+
+export interface ConstraintInfo {
+  key: string;
+  human: string;
+}
 
 export interface BindingInfo {
   strength: 'required' | 'extensible' | 'preferred' | 'example';

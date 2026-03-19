@@ -24,7 +24,8 @@ export default defineConfig({
     conditions: ['browser', 'default'],
   },
   optimizeDeps: {
-    include: ['@prismui/core', '@prismui/react', 'fhir-rest-client', 'fhir-runtime'],
+    include: ['@prismui/core', '@prismui/react', 'fhir-runtime'],
+    exclude: ['fhir-rest-client'],
   },
   server: {
     port: 3000,

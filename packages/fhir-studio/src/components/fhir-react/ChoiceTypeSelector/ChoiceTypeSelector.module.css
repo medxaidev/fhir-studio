@@ -1,0 +1,14 @@
+.choiceType {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.typeSelect {
+  width: 160px;
+}
+
+.valueInput {
+  width: 100%;
+}

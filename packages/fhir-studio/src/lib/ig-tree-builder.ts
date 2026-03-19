@@ -26,6 +26,7 @@ import type {
   BackboneTreeNode,
   ChoiceVariant,
   BindingInfo,
+  ConstraintInfo,
 } from './ig-tree-types';
 
 // ---------------------------------------------------------------------------
@@ -196,6 +197,11 @@ function buildNodeForElement(
 // Element node
 // ---------------------------------------------------------------------------
 
+function extractConstraints(el: CanonicalElement): ConstraintInfo[] | undefined {
+  if (!el.constraints || el.constraints.length === 0) return undefined;
+  return el.constraints.map((c) => ({ key: c.key, human: c.human }));
+}
+
 function buildElementNode(
   el: CanonicalElement,
   _profile: CanonicalProfile,
@@ -213,6 +219,7 @@ function buildElementNode(
     max: formatMax(el.max),
     mustSupport: el.mustSupport,
     binding: extractBinding(el),
+    constraints: extractConstraints(el),
   };
 }
 
@@ -307,6 +314,7 @@ function buildSlicedElementNode(
     max: formatMax(el.max),
     mustSupport: el.mustSupport,
     binding: extractBinding(el),
+    constraints: extractConstraints(el),
   };
 }
 

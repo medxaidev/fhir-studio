@@ -1,9 +1,5 @@
 /**
  * RawJsonPanel — Right-side panel showing raw JSON of selected resource.
- *
- * Supports two view modes:
- * - Structured: ElementDetailPanel content (existing)
- * - JSON: Full StructureDefinition JSON with syntax highlighting
  */
 
 import { useState, useEffect, useMemo } from 'react';
@@ -12,14 +8,10 @@ import { serverStore } from '../../../stores/server-store';
 import { Spinner } from '../../ui';
 import styles from './RawJsonPanel.module.css';
 
-type ViewMode = 'structured' | 'json';
-
 interface RawJsonPanelProps {
   resourceId: string | null;
   collapsed: boolean;
   onToggleCollapse: () => void;
-  /** Structured view content (e.g., ElementDetailPanel) */
-  structuredContent?: React.ReactNode;
 }
 
 /** Simple JSON syntax highlighting via regex */
@@ -85,14 +77,12 @@ export function RawJsonPanel({
   resourceId,
   collapsed,
   onToggleCollapse,
-  structuredContent,
 }: RawJsonPanelProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('structured');
   const [json, setJson] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!resourceId || viewMode !== 'json') {
+    if (!resourceId) {
       setJson(null);
       return;
     }
@@ -126,7 +116,7 @@ export function RawJsonPanel({
     });
 
     return () => { cancelled = true; };
-  }, [resourceId, viewMode]);
+  }, [resourceId]);
 
   const highlighted = useMemo(() => {
     if (!json) return null;
@@ -140,20 +130,7 @@ export function RawJsonPanel({
   return (
     <div className={styles.panel}>
       <div className={styles.header}>
-        <div className={styles.tabGroup}>
-          <button
-            className={`${styles.tabBtn} ${viewMode === 'structured' ? styles.tabBtnActive : ''}`}
-            onClick={() => setViewMode('structured')}
-          >
-            Structured
-          </button>
-          <button
-            className={`${styles.tabBtn} ${viewMode === 'json' ? styles.tabBtnActive : ''}`}
-            onClick={() => setViewMode('json')}
-          >
-            JSON
-          </button>
-        </div>
+        <span className={styles.headerTitle}>JSON</span>
         <button className={styles.collapseBtn} onClick={onToggleCollapse} title="Collapse panel">
           ▶
         </button>
@@ -161,24 +138,20 @@ export function RawJsonPanel({
 
       <div className={styles.body}>
         {!resourceId && (
-          <div className={styles.empty}>Select a profile to view details</div>
+          <div className={styles.empty}>Select a profile to view JSON</div>
         )}
 
-        {resourceId && viewMode === 'structured' && (
-          structuredContent ?? <div className={styles.empty}>No structured view</div>
-        )}
-
-        {resourceId && viewMode === 'json' && loading && (
+        {resourceId && loading && (
           <div className={styles.loading}>
             <Spinner size="sm" />
           </div>
         )}
 
-        {resourceId && viewMode === 'json' && !loading && json && (
+        {resourceId && !loading && json && (
           <pre className={styles.jsonPre}>{highlighted}</pre>
         )}
 
-        {resourceId && viewMode === 'json' && !loading && !json && (
+        {resourceId && !loading && !json && (
           <div className={styles.empty}>Failed to load JSON</div>
         )}
       </div>

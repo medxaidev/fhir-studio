@@ -156,7 +156,6 @@ export function IgDetailView() {
               resourceId={selectedResourceId}
               collapsed={rawPanelCollapsed}
               onToggleCollapse={() => setRawPanelCollapsed((v) => !v)}
-              structuredContent={<ElementDetailPanel />}
             />
           )}
           {selectedResourceId && rawPanelCollapsed && (
