@@ -6,9 +6,10 @@ import fs from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Check if we're in a monorepo (root node_modules exists)
-const rootNodeModules = path.resolve(__dirname, '../../node_modules');
-const useMonorepoAliases = fs.existsSync(rootNodeModules);
+// Check if packages are in root node_modules (monorepo) or local node_modules (standalone)
+const rootPrismui = path.resolve(__dirname, '../../node_modules/@prismui/react');
+const localPrismui = path.resolve(__dirname, 'node_modules/@prismui/react');
+const useMonorepoAliases = fs.existsSync(rootPrismui) && !fs.existsSync(localPrismui);
 
 const aliases = [
   // Node built-in stubs for fhir-runtime's server-only IG extraction code
@@ -18,7 +19,7 @@ const aliases = [
   { find: 'node:url', replacement: path.resolve(__dirname, 'src/lib/node-stubs/url.ts') },
 ];
 
-// Only add monorepo aliases if in local dev environment
+// Only add monorepo aliases if packages are in root node_modules (not local)
 if (useMonorepoAliases) {
   aliases.unshift(
     { find: '@prismui/react', replacement: path.resolve(__dirname, '../../node_modules/@prismui/react/dist/esm/index.mjs') },
