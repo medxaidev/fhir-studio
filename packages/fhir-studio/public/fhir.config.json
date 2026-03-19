@@ -9,7 +9,7 @@
     {
       "id": "production",
       "name": "Production Server",
-      "url": "https://your-railway-app.up.railway.app",
+      "url": "https://fhir-studio-production-0cc0.up.railway.app",
       "description": "Production FHIR server on Railway"
     }
   ],
