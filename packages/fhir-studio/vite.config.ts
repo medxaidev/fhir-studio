@@ -26,7 +26,7 @@ const aliases = [
   { find: 'node:url', replacement: path.resolve(__dirname, 'src/lib/node-stubs/url.ts') },
 ];
 
-// Only add monorepo aliases if packages are in root node_modules (not local)
+// Add aliases based on package location
 if (useMonorepoAliases) {
   console.log('[vite.config] Using monorepo aliases');
   aliases.unshift(
@@ -35,7 +35,13 @@ if (useMonorepoAliases) {
     { find: 'fhir-runtime', replacement: path.resolve(__dirname, '../../node_modules/fhir-runtime/dist/esm/index.mjs') }
   );
 } else {
-  console.log('[vite.config] Using auto-resolve (no aliases)');
+  console.log('[vite.config] Using standalone aliases (local node_modules)');
+  // Add explicit aliases for standalone deployment to bypass broken exports field
+  aliases.unshift(
+    { find: '@prismui/react', replacement: path.resolve(__dirname, 'node_modules/@prismui/react/dist/esm/index.mjs') },
+    { find: '@prismui/core', replacement: path.resolve(__dirname, 'node_modules/@prismui/core/dist/esm/index.mjs') },
+    { find: 'fhir-runtime', replacement: path.resolve(__dirname, 'node_modules/fhir-runtime/dist/esm/index.mjs') }
+  );
 }
 
 export default defineConfig({
