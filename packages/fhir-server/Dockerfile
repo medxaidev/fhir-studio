@@ -9,8 +9,8 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install all dependencies (including tsx for runtime)
-RUN npm ci --production=false
+# Install all dependencies (use npm install since this is a monorepo package without its own lock file)
+RUN npm install --production=false
 
 # Copy all source files
 COPY . .
