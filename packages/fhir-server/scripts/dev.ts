@@ -65,6 +65,17 @@ async function main() {
 
   const config = await loadFhirConfig(configPath);
 
+  // 1b. Substitute environment variables in config (for Railway deployment)
+  if (config.database?.type === "postgres" && "url" in config.database && config.database.url === "$DATABASE_URL") {
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) {
+      console.error("Error: DATABASE_URL environment variable is not set");
+      process.exit(1);
+    }
+    config.database.url = dbUrl;
+    console.log("[Config] Substituted DATABASE_URL from environment");
+  }
+
   // 2. Bootstrap fhir-engine
   console.log("[Engine] Initializing fhir-engine...");
   const engine: FhirEngine = await createFhirEngine(config);
