@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-19
+
+### Added
+
+#### Phase 009: Resource CRUD Support
+
+- **`loadResourceTypes()`** — Task 9F
+  - `GET /_admin/ig/resource-types` → returns list of all FHIR resource types
+  - Supports schema-driven form generation in fhir-studio
+
+- **`expandValueSet(url, params?)`** — ValueSet expansion support
+  - `GET /ValueSet/$expand?url={url}` → returns expanded ValueSet with concepts
+  - Used for binding-based dropdowns in form inputs
+
+### Changed
+
+- **IG Service** — Enhanced defensive handling for IG list responses
+  - `loadIGList()` now handles both unwrapped array and `{ igs: [...] }` envelope formats
+  - Improved cache resilience
+
+### Dependencies
+
+- Requires `fhir-server` v0.3.0+ (Phase 009 admin endpoints)
+- Still zero runtime dependencies
+
+---
+
 ## [0.2.0] - 2026-03-18
 
 ### Added

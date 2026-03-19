@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-19
+
+### Added
+
+#### Phase 009: Resource CRUD & Admin Endpoints
+
+- **Admin IG Resource Types Endpoint** — Task 9F
+  - `GET /_admin/ig/resource-types` — Returns list of all FHIR resource types available in loaded IGs
+  - Supports schema-driven form generation in fhir-studio UI
+
+### Changed
+
+- **PackageConformance adapter** — Enhanced IG listing to include both core and custom IGs
+  - `listIGs()` now returns hl7.fhir.r4.core AND hl7.fhir.us.core
+  - Improved IGSummary transformation with proper id, url, name, version, title, status fields
+
+### Dependencies
+
+- Requires `fhir-engine` ^0.6.0 (with conformance module)
+- Upstream: `fhir-persistence` v0.7.0, `fhir-runtime` v0.11.0
+
+---
+
 ## [0.2.0] - 2026-03-18
 
 ### Added
