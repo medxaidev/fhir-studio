@@ -53,7 +53,6 @@
     "tsx": "^4.19.2"
   },
   "devDependencies": {
-    "fhir-persistence": "file:../../../../../fhir-persistence/coding/fhir-persistence",
     "rimraf": "^6.0.1",
     "esbuild": "^0.24.2",
     "typescript": "^5.7.3"
