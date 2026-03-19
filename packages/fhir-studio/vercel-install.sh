@@ -15,4 +15,11 @@ cd packages/fhir-studio
 echo "Installing dependencies..."
 npm install
 
+echo ""
+echo "=== Checking installed packages ==="
+ls -la node_modules/@prismui/ || echo "@prismui not found"
+ls -la node_modules/fhir-rest-client/ || echo "fhir-rest-client not found"
+ls -la node_modules/fhir-runtime/ || echo "fhir-runtime not found"
+
+echo ""
 echo "=== Installation complete ==="
