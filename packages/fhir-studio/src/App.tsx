@@ -22,10 +22,13 @@ function ContentRouter() {
 
 function InitApp() {
   useEffect(() => {
-    const config = loadConfig();
-    serverStore.loadServers(config.servers);
-    // Auto-connect to the default server on startup
-    serverStore.testConnection();
+    async function init() {
+      const config = await loadConfig();
+      serverStore.loadServers(config.servers, config.defaultServer);
+      // Auto-connect to the default server on startup
+      serverStore.testConnection();
+    }
+    init();
   }, []);
 
   return null;

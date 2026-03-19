@@ -42,17 +42,24 @@ export const serverStore = {
     return _client;
   },
 
-  loadServers(servers: ServerConfig[]) {
+  loadServers(servers: ServerConfig[], defaultServerId?: string) {
+    // Use defaultServerId if provided and valid, otherwise use first server
+    const initialServerId = defaultServerId && servers.some(s => s.id === defaultServerId)
+      ? defaultServerId
+      : (servers.length > 0 ? servers[0].id : null);
+
+    const initialServer = servers.find(s => s.id === initialServerId);
+
     _state = {
       ..._state,
       servers,
-      currentServerId: servers.length > 0 ? servers[0].id : null,
+      currentServerId: initialServerId,
       connectionStatus: 'idle',
       connectionError: null,
       serverVersion: null,
     };
-    if (servers.length > 0) {
-      _client = createFhirClient(servers[0].baseUrl);
+    if (initialServer) {
+      _client = createFhirClient(initialServer.url);
     }
     notify();
   },
@@ -67,7 +74,7 @@ export const serverStore = {
       connectionError: null,
       serverVersion: null,
     };
-    _client = createFhirClient(server.baseUrl);
+    _client = createFhirClient(server.url);
     notify();
   },
 
