@@ -1,0 +1,1 @@
+export { IgNavigator } from './IgNavigator';

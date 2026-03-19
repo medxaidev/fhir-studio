@@ -93,7 +93,16 @@ export async function adminIGRoutes(
         return;
       }
 
-      const igs = conformance.listIGs ? await conformance.listIGs() : [];
+      const rawIGs = conformance.listIGs ? await conformance.listIGs() : [];
+      // Transform to IGSummary shape expected by fhir-rest-client
+      const igs = rawIGs.map((ig) => ({
+        id: ig.name,
+        url: `urn:ig:${ig.name}`,
+        version: ig.version,
+        name: ig.name,
+        title: ig.name,
+        status: ig.status ?? "active",
+      }));
       reply.status(200).header("content-type", "application/json").send({ igs });
     } catch (err) {
       const { status, outcome } = errorToOutcome(err);

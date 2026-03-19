@@ -97,9 +97,22 @@ export async function igRoutes(
       }
 
       const index = await conformance.getIGIndex(igId);
+
+      // Transform IGResourceMapEntry[] → IGResourceRef[] for fhir-rest-client
+      const toRef = (entry: { resourceId: string; resourceUrl?: string; resourceName?: string; baseType?: string }) => ({
+        id: entry.resourceId,
+        url: entry.resourceUrl ?? "",
+        name: entry.resourceName ?? entry.resourceId,
+        type: entry.baseType,
+      });
+
       reply.status(200).header("content-type", "application/json").send({
         igId,
-        ...index,
+        profiles: index.profiles.map(toRef),
+        extensions: index.extensions.map(toRef),
+        valueSets: index.valueSets.map(toRef),
+        codeSystems: index.codeSystems.map(toRef),
+        searchParameters: index.searchParameters.map(toRef),
       });
     } catch (err) {
       const { status, outcome } = errorToOutcome(err);
@@ -115,7 +128,27 @@ export async function igRoutes(
     try {
       const { sdId } = request.params;
 
-      const sd = await engine.persistence.readResource("StructureDefinition", sdId);
+      // Try DB first (persisted resources)
+      let sd: Record<string, unknown> | undefined;
+      try {
+        sd = await engine.persistence.readResource("StructureDefinition", sdId) as Record<string, unknown> | undefined;
+      } catch {
+        // DB may not have the resource — fall through to in-memory lookup
+      }
+
+      // Fall back to in-memory definitions (package-backed mode)
+      // The actual fhir-engine definitions object exposes sdByUrl Map
+      const rawDefs = engine.definitions as unknown as Record<string, unknown>;
+      if (!sd && rawDefs.sdByUrl) {
+        const defs = rawDefs.sdByUrl as Map<string, Record<string, unknown>>;
+        for (const [, entry] of defs) {
+          if (entry.id === sdId) {
+            sd = entry;
+            break;
+          }
+        }
+      }
+
       if (!sd) {
         reply.status(404).header("content-type", FHIR_JSON).send(
           notFound("StructureDefinition", sdId),
@@ -123,26 +156,29 @@ export async function igRoutes(
         return;
       }
 
-      const dependencies = extractDependencies(sd as Record<string, unknown>);
+      const dependencies = extractDependencies(sd);
 
-      // Add ETag + cache headers
-      const etag = buildETag(sd.meta.versionId);
-      const lastModified = buildLastModified(sd.meta.lastUpdated);
+      // ETag from meta if available, otherwise use a hash of the id
+      const meta = sd.meta as { versionId?: string; lastUpdated?: string } | undefined;
+      if (meta?.versionId) {
+        const etag = buildETag(meta.versionId);
+        const lastModified = meta.lastUpdated ? buildLastModified(meta.lastUpdated) : undefined;
 
-      // Check If-None-Match
-      const ifNoneMatch = request.headers["if-none-match"] as string | undefined;
-      if (ifNoneMatch && ifNoneMatch === etag) {
-        reply.status(304).send();
-        return;
+        const ifNoneMatch = request.headers["if-none-match"] as string | undefined;
+        if (ifNoneMatch && ifNoneMatch === etag) {
+          reply.status(304).send();
+          return;
+        }
+
+        reply.header("etag", etag);
+        if (lastModified) reply.header("last-modified", lastModified);
       }
 
       reply
         .status(200)
         .header("content-type", FHIR_JSON)
-        .header("etag", etag)
-        .header("last-modified", lastModified)
         .header("cache-control", "max-age=3600, must-revalidate")
-        .send({ ...sd, dependencies });
+        .send({ sd, dependencies });
     } catch (err) {
       const { status, outcome } = errorToOutcome(err);
       reply.status(status).header("content-type", FHIR_JSON).send(outcome);

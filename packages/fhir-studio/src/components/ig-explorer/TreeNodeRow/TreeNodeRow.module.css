@@ -1,0 +1,111 @@
+.wrapper {
+  font-size: 13px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s;
+  user-select: none;
+}
+
+.row:hover {
+  background: var(--color-bg-secondary, #f8f9fa);
+}
+
+.rowSelected {
+  background: var(--color-accent-light, #e7f5ff);
+}
+
+.rowSelected:hover {
+  background: var(--color-accent-light, #e7f5ff);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.chevron {
+  transition: transform 0.15s ease;
+  color: var(--color-text-muted, #868e96);
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+.chevronSpacer {
+  display: inline-block;
+  width: 14px;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.kindElement {
+  color: var(--color-text-muted, #868e96);
+}
+
+.kindSlice {
+  color: #8b5cf6;
+}
+
+.kindExtension {
+  color: #ea580c;
+}
+
+.kindChoice {
+  color: #2563eb;
+}
+
+.kindBackbone {
+  color: #868e96;
+}
+
+.label {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--color-text-primary, #212529);
+}
+
+.typeCode {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--color-text-muted, #868e96);
+  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.bindingBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.children {
+  display: contents;
+}

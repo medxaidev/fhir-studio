@@ -1,0 +1,1 @@
+export { IgDetailView } from './IgDetailView';

@@ -1,26 +1,21 @@
-import { usePage } from '@prismui/react';
+import { useRouter } from '@prismui/react';
 import { ServerIcon, PackageIcon, DatabaseIcon } from '../icons';
 import styles from './Sidebar.module.css';
 
 interface NavItem {
-  id: string;
+  path: string;
   label: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'connections', label: 'Connections', icon: ServerIcon },
-  { id: 'ig',          label: 'IG Explorer', icon: PackageIcon },
-  { id: 'resources',   label: 'Resources',   icon: DatabaseIcon },
+  { path: '/connections', label: 'Connections', icon: ServerIcon },
+  { path: '/ig', label: 'IG Explorer', icon: PackageIcon },
+  { path: '/resources', label: 'Resources', icon: DatabaseIcon },
 ];
 
 export function Sidebar() {
-  const { currentPage, mount, transition } = usePage();
-
-  const handleNav = (pageId: string) => {
-    mount(pageId);
-    transition(pageId);
-  };
+  const { path, push } = useRouter();
 
   return (
     <aside className={styles.sidebar}>
@@ -32,12 +27,12 @@ export function Sidebar() {
       <nav className={styles.nav}>
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
-          const active = currentPage === item.id;
+          const active = path === item.path || (path === '/' && item.path === '/connections');
           return (
             <button
-              key={item.id}
+              key={item.path}
               className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
-              onClick={() => handleNav(item.id)}
+              onClick={() => push(item.path)}
             >
               <span className={styles.navIcon}>
                 <Icon />

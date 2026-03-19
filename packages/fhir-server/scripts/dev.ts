@@ -19,6 +19,8 @@ import { existsSync } from "node:fs";
 import { loadFhirConfig, createFhirEngine } from "fhir-engine";
 import type { FhirEngine } from "fhir-engine";
 import { FhirServer } from "../src/server/fhir-server.js";
+import { createPackageConformance } from "../src/ig/package-conformance.js";
+import type { EngineDefinitions } from "../src/ig/package-conformance.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -66,6 +68,14 @@ async function main() {
   // 2. Bootstrap fhir-engine
   console.log("[Engine] Initializing fhir-engine...");
   const engine: FhirEngine = await createFhirEngine(config);
+
+  // 2b. Wire up PackageConformance (reads IG data from in-memory definitions)
+  const rawDefs = (engine as unknown as Record<string, unknown>).definitions;
+  if (rawDefs && typeof rawDefs === "object" && "sdByUrl" in (rawDefs as object)) {
+    (engine as unknown as Record<string, unknown>).conformance =
+      createPackageConformance(rawDefs as EngineDefinitions);
+    console.log("[Engine] PackageConformance wired (in-memory definitions)");
+  }
 
   // 3. Display engine status (fhir-cli pattern: engine.status())
   const status = engine.status();

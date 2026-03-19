@@ -1,32 +1,16 @@
 .page {
   display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.notConnected {
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100%;
-}
-
-.placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-md);
+  flex: 1;
+  font-size: 14px;
+  color: var(--color-text-muted, #868e96);
   text-align: center;
-  color: var(--color-text-muted);
-  max-width: 400px;
-}
-
-.placeholder svg {
-  opacity: 0.3;
-}
-
-.title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.description {
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-  color: var(--color-text-secondary);
+  padding: 32px;
 }

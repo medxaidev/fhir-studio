@@ -822,7 +822,8 @@ export class MedXAIClient {
    */
   async loadIGList(): Promise<IGSummary[]> {
     const url = `${this.baseUrl}/_admin/ig/list`;
-    return this.cachedGet<IGSummary[]>(url);
+    const result = await this.cachedGet<{ igs: IGSummary[] }>(url);
+    return result.igs ?? [];
   }
 
   /**

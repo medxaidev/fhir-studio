@@ -1,18 +1,19 @@
 import { useSyncExternalStore } from 'react';
-import { usePage } from '@prismui/react';
+import { useRouter } from '@prismui/react';
 import { StatusDot } from '../ui';
 import { serverStore } from '../../stores/server-store';
 import styles from './Header.module.css';
 
-const PAGE_TITLES: Record<string, string> = {
-  connections: 'Server Connections',
-  ig: 'Implementation Guides',
-  resources: 'Resource Explorer',
+const PATH_TITLES: Record<string, string> = {
+  '/': 'Server Connections',
+  '/connections': 'Server Connections',
+  '/ig': 'IG Explorer',
+  '/resources': 'Resource Explorer',
 };
 
 export function Header() {
-  const { currentPage } = usePage();
-  const title = PAGE_TITLES[currentPage ?? ''] ?? 'FHIR Studio';
+  const { path } = useRouter();
+  const title = PATH_TITLES[path] ?? 'FHIR Studio';
   const state = useSyncExternalStore(serverStore.subscribe, serverStore.getState);
   const currentServer = serverStore.getCurrentServer();
 
