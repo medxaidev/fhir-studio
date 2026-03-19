@@ -9,7 +9,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Check if packages are in root node_modules (monorepo) or local node_modules (standalone)
 const rootPrismui = path.resolve(__dirname, '../../node_modules/@prismui/react');
 const localPrismui = path.resolve(__dirname, 'node_modules/@prismui/react');
-const useMonorepoAliases = fs.existsSync(rootPrismui) && !fs.existsSync(localPrismui);
+const rootExists = fs.existsSync(rootPrismui);
+const localExists = fs.existsSync(localPrismui);
+const useMonorepoAliases = rootExists && !localExists;
+
+console.log('[vite.config] Alias detection:');
+console.log('  rootPrismui exists:', rootExists, rootPrismui);
+console.log('  localPrismui exists:', localExists, localPrismui);
+console.log('  useMonorepoAliases:', useMonorepoAliases);
 
 const aliases = [
   // Node built-in stubs for fhir-runtime's server-only IG extraction code
@@ -21,11 +28,14 @@ const aliases = [
 
 // Only add monorepo aliases if packages are in root node_modules (not local)
 if (useMonorepoAliases) {
+  console.log('[vite.config] Using monorepo aliases');
   aliases.unshift(
     { find: '@prismui/react', replacement: path.resolve(__dirname, '../../node_modules/@prismui/react/dist/esm/index.mjs') },
     { find: '@prismui/core', replacement: path.resolve(__dirname, '../../node_modules/@prismui/core/dist/esm/index.mjs') },
     { find: 'fhir-runtime', replacement: path.resolve(__dirname, '../../node_modules/fhir-runtime/dist/esm/index.mjs') }
   );
+} else {
+  console.log('[vite.config] Using auto-resolve (no aliases)');
 }
 
 export default defineConfig({
