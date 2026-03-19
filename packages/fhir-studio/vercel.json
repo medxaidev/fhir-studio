@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "rm -f package-lock.json && npm install --legacy-peer-deps",
+  "installCommand": "cd /vercel/path0/packages/fhir-studio && rm -rf node_modules package-lock.json && npm install --no-workspaces",
   "devCommand": "npm run dev",
   "rewrites": [
     {
