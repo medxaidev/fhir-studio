@@ -118,10 +118,20 @@ The following files are configured for Railway with PostgreSQL:
 
 - **`fhir.config.railway.json`** - Uses `$DATABASE_URL` environment variable
 - **`railway.json`** - Deployment configuration (uses `npm run start:prod`)
-- **`nixpacks.toml`** - Build configuration
-- **`.railwayignore`** - Files to exclude from deployment
+- **`nixpacks.toml`** - Build configuration (installs all deps with `--production=false`)
+- **`.railwayignore`** - Excludes test files and unnecessary files
 
-**Note:** Railway runs the server using `tsx` (TypeScript execution) via `npm run start:prod`, which executes TypeScript directly without compilation. This avoids build errors in legacy code paths that aren't part of the server runtime.
+### Deployment Strategy
+
+**Dev Mode Deployment (No Build Step):**
+
+Railway runs the server using `tsx` to execute TypeScript directly:
+
+- Command: `npm run start:prod` → `tsx ./scripts/dev.ts --config fhir.config.railway.json`
+- `tsx` is in `dependencies` for production use
+- No TypeScript compilation required
+- Avoids build errors in unused legacy code paths
+- All dependencies installed (including devDependencies needed for runtime)
 
 ## ☁️ Deploy fhir-studio to Vercel
 

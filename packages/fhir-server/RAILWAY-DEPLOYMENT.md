@@ -44,10 +44,26 @@ All configuration files are already set up:
 
 - ✅ `fhir.config.railway.json` - Uses PostgreSQL via `$DATABASE_URL`
 - ✅ `railway.json` - Deployment settings (uses `npm run start:prod`)
-- ✅ `nixpacks.toml` - Build configuration
-- ✅ `.railwayignore` - Exclude unnecessary files
+- ✅ `nixpacks.toml` - Build configuration (installs all deps, no build step)
+- ✅ `.railwayignore` - Excludes test files and unnecessary files
 
-**Note:** Railway deployment uses `tsx` to run TypeScript directly (via `npm run start:prod`), so no build step is required. This avoids TypeScript compilation errors in unused legacy code paths.
+## 🔧 Deployment Strategy
+
+**Dev Mode Deployment (No Build Required):**
+
+Railway runs the server using `tsx` (TypeScript execution) via `npm run start:prod`:
+
+- ✅ Executes TypeScript directly without compilation
+- ✅ Avoids TypeScript build errors in legacy code paths
+- ✅ Uses `fhir.config.railway.json` for PostgreSQL connection
+- ✅ `tsx` is in `dependencies` (not `devDependencies`) for production use
+- ✅ All dependencies installed with `npm ci --production=false`
+
+**Why no build step?**
+
+- Legacy code paths (`src/auth/`, `src/validation/`) have TypeScript errors
+- These paths are not used in runtime but would fail `tsc` compilation
+- Using `tsx` bypasses compilation and runs the working code directly
 
 ## 🔧 CLI Method (Alternative)
 
