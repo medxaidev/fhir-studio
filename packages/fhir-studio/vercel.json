@@ -1,8 +1,8 @@
 {
-  "buildCommand": "cd ../.. && npm run build --workspace=packages/fhir-studio",
+  "buildCommand": "tsc && vite build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "cd ../.. && rm -f package-lock.json && npm install --no-package-lock",
+  "installCommand": "cd ../.. && rm -f package-lock.json && npm install --no-package-lock && cd packages/fhir-studio",
   "devCommand": "npm run dev",
   "rewrites": [
     {
