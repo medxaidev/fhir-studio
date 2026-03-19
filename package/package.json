@@ -1,6 +1,6 @@
 {
   "name": "fhir-rest-client",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "FHIR R4 TypeScript HTTP SDK — zero runtime dependencies, cross-platform (Browser + Node.js 18+)",
   "homepage": "https://github.com/nicefhir/fhir-studio",
   "license": "MIT",
@@ -26,14 +26,10 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.mjs"
-      },
-      "require": {
-        "types": "./dist/cjs/index.d.ts",
-        "default": "./dist/cjs/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs",
+      "default": "./dist/esm/index.mjs"
     }
   },
   "files": [
