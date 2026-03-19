@@ -1,8 +1,8 @@
 {
-  "buildCommand": "npm ls fhir-rest-client && cat node_modules/fhir-rest-client/package.json && ls -la node_modules/fhir-rest-client/dist && npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "npm cache clean --force && npm install fhir-rest-client@0.3.2 && npm install",
+  "installCommand": "npm install",
   "devCommand": "npm run dev",
   "rewrites": [
     {
