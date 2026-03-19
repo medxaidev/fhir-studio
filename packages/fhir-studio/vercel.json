@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "echo '=== Checking fhir-rest-client installation ===' && ls -la node_modules/fhir-rest-client/ && echo '=== package.json ===' && cat node_modules/fhir-rest-client/package.json && echo '=== dist directory ===' && ls -la node_modules/fhir-rest-client/dist/ && echo '=== Building ===' && npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
   "installCommand": "npm install",
