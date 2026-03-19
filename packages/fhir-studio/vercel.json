@@ -2,7 +2,7 @@
   "buildCommand": "bash debug-build.sh",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "npm install --install-links=false",
+  "installCommand": "bash vercel-install.sh",
   "devCommand": "npm run dev",
   "rewrites": [
     {
