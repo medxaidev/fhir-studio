@@ -39,6 +39,7 @@
     "clean": "rimraf dist",
     "build": "npm run clean && tsc && node ./scripts/esbuild.mjs",
     "dev": "tsx watch ./scripts/dev.ts",
+    "dev:postgres": "tsx watch ./scripts/dev.ts --config fhir.config.postgres.json",
     "start": "tsx ./scripts/dev.ts",
     "start:prod": "tsx ./scripts/dev.ts --config fhir.config.railway.json",
     "test": "vitest"

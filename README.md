@@ -5,6 +5,20 @@ A modern FHIR R4 development platform with a full-stack TypeScript implementatio
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-0.3.0-green.svg)](https://github.com/nicefhir/fhir-studio)
 
+## 🚀 Live Demo
+
+**Try it now:** [https://fhir-studio.vercel.app/](https://fhir-studio.vercel.app/)
+
+Experience fhir-studio in action with our live demo deployment on Vercel. The demo includes:
+
+- 📚 **IG Explorer** - Browse FHIR Implementation Guides (hl7.fhir.r4.core, hl7.fhir.us.core)
+- 🌳 **Profile Viewer** - Explore StructureDefinitions with tree-based visualization
+- 📝 **Resource Management** - Create, read, update, and delete FHIR resources with schema-driven forms
+- 🔍 **ValueSet Integration** - Dropdown fields with ValueSet expansion for coded elements
+- 🎯 **Extension Support** - Profile-based extension rendering (e.g., US Core Race/Ethnicity)
+
+> **Note:** The demo connects to a production FHIR server deployed on Railway. You can switch between local and production servers in the Connections page.
+
 ## Overview
 
 fhir-studio is a monorepo containing three main packages for building FHIR R4 applications:

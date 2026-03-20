@@ -2,7 +2,7 @@
   "fhirVersion": "R4",
   "database": {
     "type": "postgres",
-    "url": "postgresql://postgres:assert@localhost:5433/fhir_server_test"
+    "url": "postgresql://postgres:assert@localhost:5433/fhir2"
   },
   "packages": {
     "path": "./fhir-packages"

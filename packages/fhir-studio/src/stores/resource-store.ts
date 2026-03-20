@@ -150,11 +150,19 @@ export const resourceStore = {
       return;
     }
 
+    console.log('[resource-store] Loading resource types from:', client.getBaseUrl());
     setState({ resourceTypesLoading: true, resourceTypesError: null });
     try {
       const types = await client.loadResourceTypes();
+      console.log('[resource-store] Loaded resource types:', types.length);
       setState({ resourceTypes: types, resourceTypesLoading: false });
+      console.log('[resource-store] State after loading:', {
+        resourceTypes: _state.resourceTypes.length,
+        resourceTypesLoading: _state.resourceTypesLoading,
+        viewMode: _state.viewMode
+      });
     } catch (err) {
+      console.error('[resource-store] Failed to load resource types:', err);
       const msg = err instanceof Error ? err.message : 'Failed to load resource types';
       setState({ resourceTypesLoading: false, resourceTypesError: msg });
     }
@@ -164,14 +172,30 @@ export const resourceStore = {
     const client = serverStore.getClient();
     if (!client) return;
 
+    console.log('[resource-store] Loading resources for type:', resourceType);
     setState({ resourcesLoading: true, resourcesError: null });
     try {
-      const bundle = await client.search(resourceType, { _count: '50', _sort: '-_lastUpdated' });
+      const timeoutMs = 30000; // 30 second timeout
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out after 30 seconds')), timeoutMs)
+      );
+
+      const bundle = await Promise.race([
+        client.search(resourceType, { _count: '50', _sort: '-_lastUpdated' }),
+        timeoutPromise
+      ]);
+
+      console.log('[resource-store] Loaded resources:', bundle.entry?.length ?? 0);
       const entries = (bundle.entry ?? [])
         .map((e: { resource?: FhirResource }) => e.resource)
         .filter(Boolean) as FhirResource[];
       setState({ resources: entries, resourcesLoading: false });
+      console.log('[resource-store] Resources state updated:', {
+        count: _state.resources.length,
+        loading: _state.resourcesLoading
+      });
     } catch (err) {
+      console.error('[resource-store] Failed to load resources:', err);
       const msg = err instanceof Error ? err.message : 'Failed to load resources';
       setState({ resourcesLoading: false, resourcesError: msg });
     }

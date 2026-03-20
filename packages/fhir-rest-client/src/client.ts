@@ -840,7 +840,9 @@ export class MedXAIClient {
    */
   async loadResourceTypes(): Promise<string[]> {
     const url = `${this.baseUrl}/_admin/ig/resource-types`;
+    console.log('[MedXAIClient] loadResourceTypes - fetching from:', url);
     const result = await this.cachedGet<{ resourceTypes: string[] }>(url);
+    console.log('[MedXAIClient] loadResourceTypes - result:', result);
     return result.resourceTypes ?? [];
   }
 

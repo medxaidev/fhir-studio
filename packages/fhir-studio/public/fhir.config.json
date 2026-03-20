@@ -13,5 +13,5 @@
       "description": "Production FHIR server on Railway"
     }
   ],
-  "defaultServer": "production"
+  "defaultServer": "local"
 }
