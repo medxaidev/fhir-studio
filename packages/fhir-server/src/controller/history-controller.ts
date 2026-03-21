@@ -7,7 +7,7 @@
  * @module fhir-server/controller
  */
 
-import type { FastifyReply } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import type { FhirEngine } from "../types/engine.js";
 import type { Bundle, BundleEntry } from "../types/fhir.js";
 import { FHIR_JSON, buildETag, buildLastModified } from "../error/response.js";
@@ -26,10 +26,25 @@ export async function handleHistoryInstance(
   resourceType: string,
   id: string,
   reply: FastifyReply,
+  request?: FastifyRequest,
 ): Promise<void> {
   try {
-    const entries = await engine.persistence.readHistory(resourceType, id);
+    const allEntries = await engine.persistence.readHistory(resourceType, id);
     const base = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+
+    // FIX-9: Support _count and _since query parameters
+    const query = (request?.query ?? {}) as Record<string, string | undefined>;
+    const countParam = query._count ? parseInt(query._count, 10) : undefined;
+    const sinceParam = query._since;
+
+    let entries = allEntries;
+    if (sinceParam) {
+      const sinceDate = new Date(sinceParam).getTime();
+      entries = entries.filter((e) => new Date(e.lastUpdated).getTime() >= sinceDate);
+    }
+    if (countParam !== undefined && countParam > 0) {
+      entries = entries.slice(0, countParam);
+    }
 
     const bundleEntries: BundleEntry[] = entries.map((entry) => {
       const be: BundleEntry = {

@@ -84,6 +84,38 @@ function buildMinimalCapabilityStatement(
 ): CapabilityStatement {
   const resourceTypes = engine.resourceTypes;
 
+  // FIX-1: Build searchParam declarations from engine.definitions
+  const getSearchParamsForType = (type: string): Array<{ name: string; type: string; documentation?: string }> => {
+    const params: Array<{ name: string; type: string; documentation?: string }> = [];
+    try {
+      const defs = engine.definitions as unknown as Record<string, unknown>;
+      if (typeof defs.getSearchParameters === "function") {
+        const sps = (defs.getSearchParameters as (t: string) => Array<Record<string, unknown>>)(type);
+        if (Array.isArray(sps)) {
+          for (const sp of sps) {
+            if (sp.code && sp.type) {
+              params.push({
+                name: sp.code as string,
+                type: sp.type as string,
+                ...(sp.description ? { documentation: sp.description as string } : {}),
+              });
+            }
+          }
+        }
+      }
+    } catch {
+      // definitions.getSearchParameters may not be available
+    }
+    // Always include common search params if none found
+    if (params.length === 0) {
+      params.push(
+        { name: "_id", type: "token" },
+        { name: "_lastUpdated", type: "date" },
+      );
+    }
+    return params;
+  };
+
   const resources = resourceTypes.map((type) => ({
     type,
     interaction: [
@@ -102,6 +134,7 @@ function buildMinimalCapabilityStatement(
     conditionalRead: "not-supported" as const,
     conditionalUpdate: false,
     conditionalDelete: "not-supported" as const,
+    searchParam: getSearchParamsForType(type),
   }));
 
   return {

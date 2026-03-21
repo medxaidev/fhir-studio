@@ -68,6 +68,10 @@ export function fhirErrorHandler(
   }
 
   // Map all other errors to OperationOutcome
+  if (error instanceof Error) {
+    console.error(`[ErrorHandler] ${error.name}: ${error.message}`);
+    if (error.stack) console.error(error.stack.split("\n").slice(0, 3).join("\n"));
+  }
   const { status, outcome } = errorToOutcome(error);
   reply.status(status).header("content-type", FHIR_JSON).send(outcome);
 }

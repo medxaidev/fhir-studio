@@ -78,6 +78,14 @@ export async function handleSearch(
 
     reply.status(200).header("content-type", FHIR_JSON).send(bundle);
   } catch (err) {
+    // Unknown search parameter errors → 400 Bad Request (not 500)
+    if (err instanceof Error && err.message.includes("Unknown search parameter")) {
+      reply.status(400).header("content-type", FHIR_JSON).send({
+        resourceType: "OperationOutcome",
+        issue: [{ severity: "error", code: "not-supported", diagnostics: err.message }],
+      });
+      return;
+    }
     const { status, outcome } = errorToOutcome(err);
     reply.status(status).header("content-type", FHIR_JSON).send(outcome);
   }

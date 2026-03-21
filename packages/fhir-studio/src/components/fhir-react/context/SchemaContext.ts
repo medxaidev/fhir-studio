@@ -9,6 +9,7 @@
 
 import { createContext } from 'react';
 import type { InternalSchemaElement } from '../types/schema-types';
+import type { ValidationIssue } from '../utils/validation-utils';
 import type { SchemaService } from '../../../services/schema-service';
 
 export interface ElementsContextType {
@@ -29,3 +30,6 @@ ElementsContext.displayName = 'ElementsContext';
 
 export const SchemaServiceContext = createContext<SchemaService | null>(null);
 SchemaServiceContext.displayName = 'SchemaServiceContext';
+
+export const ValidationContext = createContext<ValidationIssue[]>([]);
+ValidationContext.displayName = 'ValidationContext';

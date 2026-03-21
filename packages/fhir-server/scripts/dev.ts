@@ -53,6 +53,13 @@ function resolveConfigPath(): string {
   return defaultPath;
 }
 
+process.on("uncaughtException", (err) => {
+  console.error("[UNCAUGHT]", err);
+});
+process.on("unhandledRejection", (err) => {
+  console.error("[UNHANDLED_REJECTION]", err);
+});
+
 async function main() {
   console.log("╔═══════════════════════════════════════════╗");
   console.log("║     FHIR Server v0.1.0 — Dev Mode        ║");
@@ -110,6 +117,7 @@ async function main() {
     host: HOST,
     baseUrl: `http://localhost:${PORT}`,
     logger: false,
+    rateLimit: (config as any).rateLimit ?? { enabled: false },
   });
 
   console.log(`[Server] Starting on ${HOST}:${PORT}...`);

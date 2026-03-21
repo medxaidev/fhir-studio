@@ -211,13 +211,16 @@ export async function adminIGRoutes(
     reply: FastifyReply,
   ) => {
     try {
-      const vsUrl = (request.query as Record<string, string>).url;
-      if (!vsUrl) {
+      const rawVsUrl = (request.query as Record<string, string>).url;
+      if (!rawVsUrl) {
         reply.status(400).header("content-type", FHIR_JSON).send(
           badRequest("Missing required query parameter: url"),
         );
         return;
       }
+
+      // FIX-7: Decode URL-encoded query parameter
+      const vsUrl = decodeURIComponent(rawVsUrl);
 
       const rawDefs = engine.definitions as unknown as Record<string, unknown>;
       const vsByUrl = rawDefs.vsByUrl as Map<string, Record<string, unknown>> | undefined;
@@ -231,7 +234,9 @@ export async function adminIGRoutes(
         return;
       }
 
-      const vs = vsByUrl.get(vsUrl);
+      // Strip FHIR version pipe (e.g. |4.0.1) — vsByUrl is keyed without version
+      const urlWithoutVersion = vsUrl.includes("|") ? vsUrl.split("|")[0] : vsUrl;
+      const vs = vsByUrl.get(urlWithoutVersion) ?? vsByUrl.get(vsUrl) ?? vsByUrl.get(rawVsUrl);
       if (!vs) {
         reply.status(404).header("content-type", FHIR_JSON).send(
           badRequest(`ValueSet not found: ${vsUrl}`),

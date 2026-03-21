@@ -15,7 +15,6 @@ import type {
   OperationOutcome,
   HistoryEntry,
   SearchResult,
-  Bundle,
 } from "./fhir.js";
 
 // =============================================================================

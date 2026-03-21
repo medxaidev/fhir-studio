@@ -36,3 +36,63 @@
   color: var(--color-error);
   padding: 2px 4px;
 }
+
+.issues {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary, var(--color-bg));
+  overflow: hidden;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.issuesHeader {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: 6px 10px;
+  background: var(--color-bg-tertiary, rgba(0, 0, 0, 0.03));
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-error);
+}
+
+.issuesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.issuesList li {
+  display: flex;
+  gap: 8px;
+  padding: 4px 10px;
+  font-size: var(--font-size-xs);
+  border-bottom: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.05));
+  align-items: baseline;
+}
+
+.issuesList li:last-child {
+  border-bottom: none;
+}
+
+.issuesList li.error {
+  color: var(--color-error);
+}
+
+.issuesList li.warning {
+  color: var(--color-warning, #b45309);
+}
+
+.issuesList li.information {
+  color: var(--color-text-muted);
+}
+
+.issuePath {
+  font-family: 'Consolas', 'Menlo', 'Monaco', monospace;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.issueMsg {
+  color: var(--color-text-secondary);
+}

@@ -5,18 +5,25 @@
  * Handles extension slice data mapping: extension slices are stored in the
  * resource's `extension[]` array by URL, but rendered as named form fields.
  *
+ * State management follows Medplum's pattern:
+ * - Each ElementsInput owns its local state (shallow copy of the sub-object)
+ * - `setValueWrapper` calls both local `setValue` AND `props.onChange`
+ * - `setPropertyValue` handles choice type key cleanup
+ * - Parent receives the full updated sub-object via onChange
+ *
  * @module fhir-react/ElementsInput
  */
 
-import { useContext, useState, useCallback } from 'react';
+import { useContext, useState, useMemo } from 'react';
 import type { JSX } from 'react';
 import type { InternalSchemaElement } from '../types/schema-types';
-import { ElementsContext } from '../context/SchemaContext';
+import { ElementsContext, ValidationContext } from '../context/SchemaContext';
 import { FormSection } from '../FormSection/FormSection';
 import { ResourcePropertyInput } from '../ResourcePropertyInput/ResourcePropertyInput';
 import { getElementsToRender } from '../utils/schema-utils';
 import { setPropertyValue } from '../utils/property-utils';
 import { capitalize } from '../utils/type-utils';
+import type { ValidationIssue } from '../utils/validation-utils';
 import styles from './ElementsInput.module.css';
 
 export interface ElementsInputProps {
@@ -94,39 +101,72 @@ function writeExtensionValue(
   return [...filtered, entry];
 }
 
+// ─── Field-level validation helper ───────────────────────────────────────────
+
+/**
+ * Find the first error message for a given field path from the validation issues list.
+ * For choice types (e.g. Patient.deceased[x]), matches any expanded variant
+ * (e.g. Patient.deceasedBoolean, Patient.deceasedDateTime).
+ */
+function getFieldError(
+  issues: ValidationIssue[],
+  fieldPath: string,
+  element: InternalSchemaElement,
+): string | undefined {
+  if (!issues || issues.length === 0) return undefined;
+
+  // Direct match
+  const direct = issues.find((i) => i.path === fieldPath && i.severity === 'error');
+  if (direct) return direct.message;
+
+  // Choice type: match expanded paths (e.g. Patient.value[x] → Patient.valueString)
+  if (fieldPath.includes('[x]')) {
+    const basePath = fieldPath.replace('[x]', '');
+    for (const t of element.type) {
+      const expanded = basePath + capitalize(t.code);
+      const match = issues.find((i) => i.path === expanded && i.severity === 'error');
+      if (match) return match.message;
+    }
+  }
+
+  // Match child errors (e.g. Patient.name has errors at Patient.name.family)
+  const childErrors = issues.filter((i) => i.path.startsWith(fieldPath + '.') && i.severity === 'error');
+  if (childErrors.length > 0) {
+    return `${childErrors.length} issue${childErrors.length > 1 ? 's' : ''} in nested fields`;
+  }
+
+  return undefined;
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function ElementsInput(props: ElementsInputProps): JSX.Element {
   const [value, setValue] = useState<Record<string, unknown>>(props.defaultValue ?? {});
   const ctx = useContext(ElementsContext);
-  const elementsToRender = getElementsToRender(ctx.elements)
-    // Sort: extension slices go to the bottom
-    .sort(([, a], [, b]) => {
+  const validationIssues = useContext(ValidationContext);
+
+  const elementsToRender = useMemo(() => {
+    const entries = getElementsToRender(ctx.elements);
+    // Sort: extension slices go to the bottom (stable sort — preserves original order)
+    return [...entries].sort(([, a], [, b]) => {
       const aExt = a.sliceName ? 1 : 0;
       const bExt = b.sliceName ? 1 : 0;
       return aExt - bExt;
     });
+  }, [ctx.elements]);
 
-  const handleChange = useCallback((key: string, propName: string, newFieldValue: unknown) => {
-    setValue((prev) => {
-      const next = setPropertyValue({ ...prev }, key, propName, newFieldValue);
-      props.onChange?.(next);
-      return next;
-    });
-  }, [props.onChange]);
-
-  const handleExtensionChange = useCallback((element: InternalSchemaElement, newValue: unknown) => {
-    const url = getExtensionUrl(element);
-    if (!url) return;
-    setValue((prev) => {
-      const exts = prev.extension as ExtRecord[] | undefined;
-      const updated = writeExtensionValue(exts, url, newValue, element.isArray);
-      const next = { ...prev, extension: updated };
-      if (!next.extension) delete next.extension;
-      props.onChange?.(next);
-      return next;
-    });
-  }, [props.onChange]);
+  /**
+   * Central state update — Medplum pattern:
+   * 1. Shallow-copy current value
+   * 2. Apply property change
+   * 3. Set local state AND propagate to parent
+   */
+  function setValueWrapper(newValue: Record<string, unknown>): void {
+    setValue(newValue);
+    if (props.onChange) {
+      props.onChange(newValue);
+    }
+  }
 
   return (
     <div className={styles.elements}>
@@ -143,7 +183,6 @@ export function ElementsInput(props: ElementsInputProps): JSX.Element {
             element.isArray,
           );
         } else if (element.name.includes('[x]')) {
-          // Choice type: resolve from actual key (e.g. deceasedBoolean)
           fieldValue = resolveChoiceValue(value, element);
         } else {
           fieldValue = value[key];
@@ -162,16 +201,27 @@ export function ElementsInput(props: ElementsInputProps): JSX.Element {
             htmlFor={key}
             required={required}
             readonly={element.readonly}
+            error={getFieldError(validationIssues, `${props.path}.${key}`, element)}
           >
             <ResourcePropertyInput
               element={element}
               path={`${props.path}.${key}`}
               value={fieldValue}
-              onChange={(v, propName) => {
+              onChange={(newFieldValue, propName) => {
                 if (isExtSlice) {
-                  handleExtensionChange(element, v);
+                  // Extension slice: write into extension[] array
+                  const url = getExtensionUrl(element);
+                  if (!url) return;
+                  const exts = value.extension as ExtRecord[] | undefined;
+                  const updated = writeExtensionValue(exts, url, newFieldValue, element.isArray);
+                  const next = { ...value, extension: updated };
+                  if (!next.extension) delete next.extension;
+                  setValueWrapper(next);
                 } else {
-                  handleChange(key, propName ?? key, v);
+                  // Normal property: use setPropertyValue for choice type handling
+                  setValueWrapper(
+                    setPropertyValue({ ...value }, key, propName ?? key, newFieldValue),
+                  );
                 }
               }}
             />

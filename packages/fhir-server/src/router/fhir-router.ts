@@ -38,6 +38,7 @@ import { handleCreate, handleRead, handleUpdate, handleDelete, handleVRead } fro
 import { handleSearch } from "../controller/search-controller.js";
 import { handleHistoryInstance } from "../controller/history-controller.js";
 import { handleBundle } from "../controller/bundle-controller.js";
+import { handleValidate, handleValueSetExpand, handleValueSetExpandById } from "../controller/operation-controller.js";
 import { igRoutes } from "../ig/ig-routes.js";
 import { adminIGRoutes } from "../ig/admin-ig-routes.js";
 import { terminologyTreeRoutes } from "../ig/terminology-tree-routes.js";
@@ -76,30 +77,50 @@ export async function fhirRouter(
 ): Promise<void> {
   const { engine, baseUrl } = options;
 
+  // Build a Set of valid resource types for fast lookup
+  const validTypes = new Set(engine.resourceTypes);
+
+  /** Return 404 OperationOutcome if resourceType is not a known FHIR type. */
+  function validateResourceType(resourceType: string, reply: FastifyReply): boolean {
+    if (!validTypes.has(resourceType)) {
+      reply.status(404).header("content-type", FHIR_JSON).send({
+        resourceType: "OperationOutcome",
+        issue: [{ severity: "error", code: "not-found", diagnostics: `Unknown resource type: ${resourceType}` }],
+      });
+      return false;
+    }
+    return true;
+  }
+
   // ── GET /metadata ─────────────────────────────────────────────────────────
   app.get("/metadata", async (_request: FastifyRequest, reply: FastifyReply) => {
-    const ifNoneMatch = _request.headers["if-none-match"] as string | undefined;
-    if (isNotModified(ifNoneMatch)) {
-      reply.status(304).send();
-      return;
+    try {
+      const ifNoneMatch = _request.headers["if-none-match"] as string | undefined;
+      if (isNotModified(ifNoneMatch)) {
+        reply.status(304).send();
+        return;
+      }
+
+      const json = getCachedJson();
+      const etag = getCachedETag();
+
+      if (!json) {
+        reply.status(503).header("content-type", FHIR_JSON).send({
+          resourceType: "OperationOutcome",
+          issue: [{ severity: "error", code: "exception", diagnostics: "CapabilityStatement not available" }],
+        });
+        return;
+      }
+
+      reply
+        .status(200)
+        .header("content-type", FHIR_JSON)
+        .header("etag", etag ?? "")
+        .send(json);
+    } catch (err) {
+      console.error("[METADATA ERROR]", err);
+      throw err;
     }
-
-    const json = getCachedJson();
-    const etag = getCachedETag();
-
-    if (!json) {
-      reply.status(503).header("content-type", FHIR_JSON).send({
-        resourceType: "OperationOutcome",
-        issue: [{ severity: "error", code: "exception", diagnostics: "CapabilityStatement not available" }],
-      });
-      return;
-    }
-
-    reply
-      .status(200)
-      .header("content-type", FHIR_JSON)
-      .header("etag", etag ?? "")
-      .send(json);
   });
 
   // ── GET /healthcheck ──────────────────────────────────────────────────────
@@ -118,48 +139,77 @@ export async function fhirRouter(
     await handleBundle(engine, baseUrl, request, reply);
   });
 
+  // ── FIX-6: GET /ValueSet/$expand ───────────────────────────────────────────
+  app.get("/ValueSet/\$expand", async (request: FastifyRequest, reply: FastifyReply) => {
+    await handleValueSetExpand(engine, request, reply);
+  });
+
+  // ── FIX-6: POST /ValueSet/$expand ──────────────────────────────────────────
+  app.post("/ValueSet/\$expand", async (request: FastifyRequest, reply: FastifyReply) => {
+    await handleValueSetExpand(engine, request, reply);
+  });
+
+  // ── GET /ValueSet/:id/$expand (expand by ID) ──────────────────────────────
+  app.get("/ValueSet/:id/\$expand", async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    await handleValueSetExpandById(engine, request.params.id, request, reply);
+  });
+
+  // ── FIX-5: POST /:resourceType/$validate ───────────────────────────────────
+  app.post("/:resourceType/\$validate", async (request: FastifyRequest<{ Params: { resourceType: string } }>, reply: FastifyReply) => {
+    if (!validateResourceType(request.params.resourceType, reply)) return;
+    await handleValidate(engine, request.params.resourceType, request, reply);
+  });
+
   // ── POST /:resourceType/_search ───────────────────────────────────────────
   app.post("/:resourceType/_search", async (request: FastifyRequest<{ Params: { resourceType: string } }>, reply: FastifyReply) => {
+    if (!validateResourceType(request.params.resourceType, reply)) return;
     await handleSearch(engine, baseUrl, request.params.resourceType, request, reply);
   });
 
   // ── GET /:resourceType/:id/_history/:vid (VRead) ──────────────────────────
   app.get("/:resourceType/:id/_history/:vid", async (request: FastifyRequest<{ Params: VReadParams }>, reply: FastifyReply) => {
     const { resourceType, id, vid } = request.params;
+    if (!validateResourceType(resourceType, reply)) return;
     await handleVRead(engine, resourceType, id, vid, reply);
   });
 
   // ── GET /:resourceType/:id/_history (History) ─────────────────────────────
   app.get("/:resourceType/:id/_history", async (request: FastifyRequest<{ Params: ResourceParams }>, reply: FastifyReply) => {
     const { resourceType, id } = request.params;
-    await handleHistoryInstance(engine, baseUrl, resourceType, id, reply);
+    if (!validateResourceType(resourceType, reply)) return;
+    await handleHistoryInstance(engine, baseUrl, resourceType, id, reply, request);
   });
 
   // ── GET /:resourceType/:id (Read) ─────────────────────────────────────────
   app.get("/:resourceType/:id", async (request: FastifyRequest<{ Params: ResourceParams }>, reply: FastifyReply) => {
     const { resourceType, id } = request.params;
+    if (!validateResourceType(resourceType, reply)) return;
     await handleRead(engine, resourceType, id, reply, request);
   });
 
   // ── PUT /:resourceType/:id (Update) ───────────────────────────────────────
   app.put("/:resourceType/:id", async (request: FastifyRequest<{ Params: ResourceParams }>, reply: FastifyReply) => {
     const { resourceType, id } = request.params;
+    if (!validateResourceType(resourceType, reply)) return;
     await handleUpdate(engine, baseUrl, resourceType, id, request, reply);
   });
 
   // ── DELETE /:resourceType/:id (Delete) ─────────────────────────────────────
   app.delete("/:resourceType/:id", async (request: FastifyRequest<{ Params: ResourceParams }>, reply: FastifyReply) => {
     const { resourceType, id } = request.params;
+    if (!validateResourceType(resourceType, reply)) return;
     await handleDelete(engine, resourceType, id, reply);
   });
 
   // ── GET /:resourceType (Search) ───────────────────────────────────────────
   app.get("/:resourceType", async (request: FastifyRequest<{ Params: { resourceType: string } }>, reply: FastifyReply) => {
+    if (!validateResourceType(request.params.resourceType, reply)) return;
     await handleSearch(engine, baseUrl, request.params.resourceType, request, reply);
   });
 
   // ── POST /:resourceType (Create) ──────────────────────────────────────────
   app.post("/:resourceType", async (request: FastifyRequest<{ Params: { resourceType: string } }>, reply: FastifyReply) => {
+    if (!validateResourceType(request.params.resourceType, reply)) return;
     await handleCreate(engine, baseUrl, request.params.resourceType, request, reply);
   });
 }

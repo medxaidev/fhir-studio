@@ -9,7 +9,7 @@
 
 import type { FastifyRequest, FastifyReply } from "fastify";
 import type { FhirEngine } from "../types/engine.js";
-import type { Resource } from "../types/fhir.js";
+import type { Resource, PersistedResource } from "../types/fhir.js";
 import {
   FHIR_JSON,
   buildLocationHeader,
@@ -83,7 +83,22 @@ export async function handleRead(
   request?: FastifyRequest,
 ): Promise<void> {
   try {
-    const resource = await engine.persistence.readResource(resourceType, id);
+    let resource: PersistedResource;
+    try {
+      resource = await engine.persistence.readResource(resourceType, id);
+    } catch (dbErr) {
+      // FIX-8: Fallback to engine.definitions for conformance resource types
+      if (CONFORMANCE_TYPES.has(resourceType)) {
+        const defResource = readFromDefinitions(engine, resourceType, id);
+        if (defResource) {
+          resource = defResource as PersistedResource;
+        } else {
+          throw dbErr;
+        }
+      } else {
+        throw dbErr;
+      }
+    }
     const h = buildResourceHeaders(resource);
 
     // Task 4.3: If-None-Match → 304 Not Modified
@@ -141,8 +156,40 @@ export async function handleUpdate(
       return;
     }
 
+    // FIX-3: Validate resourceType in body matches URL
+    if (!body.resourceType) {
+      reply.status(400).header("content-type", FHIR_JSON).send({
+        resourceType: "OperationOutcome",
+        issue: [{ severity: "error", code: "required", diagnostics: "Missing required field: resourceType" }],
+      });
+      return;
+    }
+    if (body.resourceType !== resourceType) {
+      reply.status(400).header("content-type", FHIR_JSON).send({
+        resourceType: "OperationOutcome",
+        issue: [{ severity: "error", code: "invalid", diagnostics: `Resource type in body (${body.resourceType}) does not match URL (${resourceType})` }],
+      });
+      return;
+    }
+
+    // Validate id in body matches URL (if present)
+    if (body.id && body.id !== id) {
+      reply.status(400).header("content-type", FHIR_JSON).send({
+        resourceType: "OperationOutcome",
+        issue: [{ severity: "error", code: "invalid", diagnostics: `Resource id in body (${body.id}) does not match URL (${id})` }],
+      });
+      return;
+    }
+
+    // FIX-4: If-Match optimistic locking
+    const ifMatch = request.headers["if-match"] as string | undefined;
+    const updateOptions: { ifMatch?: string } = {};
+    if (ifMatch) {
+      updateOptions.ifMatch = parseETag(ifMatch);
+    }
+
     const resource = { ...body, resourceType, id };
-    const updated = await engine.persistence.updateResource(resourceType, resource);
+    const updated = await engine.persistence.updateResource(resourceType, resource, updateOptions);
 
     const h = buildResourceHeaders(updated);
     const location = buildLocationHeader(baseUrl, updated.resourceType, updated.id, updated.meta.versionId);
@@ -209,4 +256,68 @@ export async function handleVRead(
     const { status, outcome } = errorToOutcome(err);
     reply.status(status).header("content-type", FHIR_JSON).send(outcome);
   }
+}
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+/**
+ * FIX-8: Try to read a conformance resource from engine.definitions when DB read fails.
+ * Returns a PersistedResource-shaped object or undefined.
+ */
+function readFromDefinitions(
+  engine: FhirEngine,
+  resourceType: string,
+  id: string,
+): Record<string, unknown> | undefined {
+  const defs = engine.definitions as unknown as Record<string, unknown>;
+
+  let resource: Record<string, unknown> | undefined;
+
+  if (resourceType === "StructureDefinition") {
+    const sdByUrl = defs.sdByUrl as Map<string, Record<string, unknown>> | undefined;
+    if (sdByUrl) {
+      resource = sdByUrl.get(id)
+        ?? sdByUrl.get(`http://hl7.org/fhir/StructureDefinition/${id}`);
+      if (!resource) {
+        for (const [, entry] of sdByUrl) {
+          if (entry.id === id || entry.type === id) { resource = entry; break; }
+        }
+      }
+    }
+  } else if (resourceType === "ValueSet") {
+    const vsByUrl = defs.vsByUrl as Map<string, Record<string, unknown>> | undefined;
+    if (vsByUrl) {
+      resource = vsByUrl.get(id)
+        ?? vsByUrl.get(`http://hl7.org/fhir/ValueSet/${id}`);
+      if (!resource) {
+        for (const [, entry] of vsByUrl) {
+          if (entry.id === id) { resource = entry; break; }
+        }
+      }
+    }
+  } else if (resourceType === "CodeSystem") {
+    const csByUrl = defs.csByUrl as Map<string, Record<string, unknown>> | undefined;
+    if (csByUrl) {
+      resource = csByUrl.get(id)
+        ?? csByUrl.get(`http://hl7.org/fhir/CodeSystem/${id}`);
+      if (!resource) {
+        for (const [, entry] of csByUrl) {
+          if (entry.id === id) { resource = entry; break; }
+        }
+      }
+    }
+  }
+
+  if (!resource) return undefined;
+
+  // Ensure it has a meta block for buildResourceHeaders
+  if (!resource.meta || typeof resource.meta !== "object") {
+    resource = {
+      ...resource,
+      meta: { versionId: "1", lastUpdated: new Date().toISOString() },
+    };
+  }
+  return resource;
 }

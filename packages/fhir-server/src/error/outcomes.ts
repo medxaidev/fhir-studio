@@ -136,7 +136,12 @@ export function errorToOutcome(err: unknown): OutcomeWithStatus {
       case "ResourceGoneError":
         return { status: 410, outcome: operationOutcome("error", "deleted", err.message) };
       case "ResourceVersionConflictError":
-        return { status: 409, outcome: operationOutcome("error", "conflict", err.message) };
+        return { status: 412, outcome: operationOutcome("error", "conflict", err.message) };
+    }
+
+    // JSON parse errors → 400 Bad Request
+    if (err instanceof SyntaxError && err.message.includes("JSON")) {
+      return { status: 400, outcome: badRequest(err.message) };
     }
 
     // Generic Error
